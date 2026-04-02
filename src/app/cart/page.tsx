@@ -11,7 +11,7 @@ export default function CartPage() {
         return (
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center min-h-[60vh] flex flex-col items-center justify-center">
                 <h1 className="text-4xl font-serif text-brand-text mb-6">Your Cart is Empty</h1>
-                <p className="text-gray-500 mb-8">Looks like you haven't added any luxury treats yet.</p>
+                <p className="text-gray-500 mb-8">Looks like you haven&apos;t added any luxury treats yet.</p>
                 <Link href="/products" className="bg-brand-primary text-white px-8 py-4 rounded-xl uppercase tracking-widest text-sm font-semibold hover:bg-brand-text transition-colors duration-300">
                     Start Shopping
                 </Link>
