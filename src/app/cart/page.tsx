@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowRight, Trash2, Minus, Plus } from "lucide-react";
 
 export default function CartPage() {
-    const { items, updateQuantity, removeFromCart, cartTotal } = useCart();
+    const { items, updateQuantity, removeFromCart, cartTotal, cartSubtotal, platformFee, deliveryFee } = useCart();
 
     if (items.length === 0) {
         return (
@@ -117,11 +117,15 @@ export default function CartPage() {
                         <div className="space-y-6 mb-8 text-sm font-light">
                             <div className="flex justify-between text-gray-600">
                                 <span className="uppercase tracking-widest text-[10px]">Subtotal</span>
-                                <span>₹{cartTotal}</span>
+                                <span>₹{cartSubtotal}</span>
                             </div>
                             <div className="flex justify-between text-gray-600">
-                                <span className="uppercase tracking-widest text-[10px]">Estimated Shipping</span>
-                                <span className="uppercase tracking-widest text-[10px]">Calculated at checkout</span>
+                                <span className="uppercase tracking-widest text-[10px]">Platform Fee</span>
+                                <span>₹{platformFee}</span>
+                            </div>
+                            <div className="flex justify-between text-gray-600">
+                                <span className="uppercase tracking-widest text-[10px]">Delivery Charge</span>
+                                <span>{deliveryFee === 0 ? "Complimentary" : `₹${deliveryFee}`}</span>
                             </div>
                         </div>
                         

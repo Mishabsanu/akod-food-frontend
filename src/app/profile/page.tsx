@@ -15,7 +15,7 @@ export default function ProfilePage() {
     };
 
     return (
-        <div className="bg-[#faf9f6] min-h-screen pt-8 pb-32 font-sans selection:bg-brand-primary/20 selection:text-black">
+        <div className="bg-[#faf9f6] min-h-screen pb-32 font-sans selection:bg-brand-primary/20 selection:text-black">
             
             {/* Ultra-Premium Header */}
             <div className="w-full bg-white border-b border-gray-100 py-10 lg:py-16 mb-8 lg:mb-12">

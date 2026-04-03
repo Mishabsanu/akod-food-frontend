@@ -6,12 +6,14 @@ import { ShoppingBag, User, Search, Menu } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import CartDrawer from "../ui/CartDrawer";
+import AuthModal from "../ui/AuthModal";
 
 export default function Navbar() {
     const { itemCount } = useCart();
     const pathname = usePathname();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isCartOpen, setIsCartOpen] = useState(false);
+    const [isAuthOpen, setIsAuthOpen] = useState(false);
 
     const links = [
         { name: "Home", path: "/" },
@@ -54,7 +56,7 @@ export default function Navbar() {
                             <Link href="/" className="px-6 border-x border-gray-200 py-2 hidden sm:block">
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
-                                    src="/logo.png"
+                                    src="/logo.jpg"
                                     alt="AKOD"
                                     className="h-20 md:h-20 w-auto object-contain"
                                 />
@@ -62,7 +64,7 @@ export default function Navbar() {
                             <Link href="/" className="sm:hidden">
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
-                                    src="/logo.png"
+                                    src="/logo.jpg"
                                     alt="AKOD"
                                     className="h-8 w-auto object-contain"
                                 />
@@ -80,9 +82,9 @@ export default function Navbar() {
                                 />
                             </div>
 
-                            <Link href="/profile" className="text-gray-800 hover:text-gray-500 transition-colors">
+                            <button onClick={() => setIsAuthOpen(true)} className="text-gray-800 hover:text-gray-500 transition-colors">
                                 <User className="h-5 w-5" strokeWidth={1.25} />
-                            </Link>
+                            </button>
 
                             <button
                                 onClick={() => setIsCartOpen(true)}
@@ -122,6 +124,9 @@ export default function Navbar() {
 
             {/* Cart Drawer Component */}
             <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+            
+            {/* Auth Modal Component */}
+            <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
         </>
     );
 }

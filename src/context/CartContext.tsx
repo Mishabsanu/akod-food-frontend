@@ -17,6 +17,9 @@ interface CartContextType {
     updateQuantity: (cartId: string, quantity: number) => void;
     clearCart: () => void;
     cartTotal: number;
+    cartSubtotal: number;
+    platformFee: number;
+    deliveryFee: number;
     itemCount: number;
 }
 
@@ -78,11 +81,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setItems([]);
     };
 
-    const cartTotal = items.reduce((total, item) => total + item.variant.price * item.quantity, 0);
+    const cartSubtotal = items.reduce((total, item) => total + item.variant.price * item.quantity, 0);
     const itemCount = items.reduce((total, item) => total + item.quantity, 0);
+    
+    const platformFee = items.length > 0 ? 50 : 0;
+    const deliveryFee = items.length > 0 ? (cartSubtotal >= 2000 ? 0 : 150) : 0;
+    const cartTotal = cartSubtotal + platformFee + deliveryFee;
 
     return (
-        <CartContext.Provider value={{ items, addToCart, removeFromCart, updateQuantity, clearCart, cartTotal, itemCount }}>
+        <CartContext.Provider value={{ items, addToCart, removeFromCart, updateQuantity, clearCart, cartTotal, itemCount, cartSubtotal, platformFee, deliveryFee }}>
             {children}
         </CartContext.Provider>
     );

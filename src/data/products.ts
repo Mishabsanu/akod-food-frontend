@@ -8,6 +8,7 @@ export interface Product {
   name: string;
   description: string;
   image: string;
+  gallery?: string[];
   category: string;
   variants: ProductVariant[];
 }
@@ -26,6 +27,7 @@ export const products: Product[] = [
     name: "Spicy Banana Chips",
     description: "Crispy Nendran banana chips coated with a fiery blend of red chilies and traditional spices.",
     image: "/4.jpeg",
+    gallery: ["/4.jpeg", "/5.jpg", "/3.jpeg", "/2.jpeg", "/4.jpeg"],
     category: "Banana Chips",
     variants: [
       { weight: "50g", price: 45 },
@@ -40,6 +42,7 @@ export const products: Product[] = [
     name: "Normal Banana Chips",
     description: "Classic salted Kerala style banana chips fried in fresh coconut oil.",
     image: "/5.jpg",
+    gallery: ["/5.jpg", "/4.jpeg", "/3.jpeg", "/2.jpeg", "/5.jpg"],
     category: "Banana Chips",
     variants: defaultVariants
   },
@@ -48,6 +51,7 @@ export const products: Product[] = [
     name: "Sweet Banana Chips",
     description: "Thickly sliced banana chips richly coated in jaggery (Sarkara Upperi).",
     image: "/3.jpeg",
+    gallery: ["/3.jpeg", "/5.jpg", "/4.jpeg", "/2.jpeg", "/3.jpeg"],
     category: "Banana Chips",
     variants: defaultVariants
   },
@@ -56,6 +60,7 @@ export const products: Product[] = [
     name: "Spicy Tapioca Chips",
     description: "Thinly sliced tapioca (cassava) chips dusted with spicy chili seasoning.",
     image: "/4.jpeg",
+    gallery: ["/4.jpeg", "/3.jpeg", "/5.jpg", "/2.jpeg", "/4.jpeg"],
     category: "Tapioca Chips",
     variants: [
       { weight: "50g", price: 35 },
@@ -70,6 +75,7 @@ export const products: Product[] = [
     name: "Normal Tapioca Chips",
     description: "Perfectly salted, crunchy tapioca chips.",
     image: "/5.jpg",
+    gallery: ["/5.jpg", "/4.jpeg", "/3.jpeg", "/2.jpeg", "/5.jpg"],
     category: "Tapioca Chips",
     variants: [
       { weight: "50g", price: 30 },
@@ -84,6 +90,7 @@ export const products: Product[] = [
     name: "Sweet Tapioca Chips",
     description: "Tapioca chips with a light, sweet glaze for the perfect tea-time snack.",
     image: "/3.jpeg",
+    gallery: ["/3.jpeg", "/5.jpg", "/4.jpeg", "/2.jpeg", "/3.jpeg"],
     category: "Tapioca Chips",
     variants: [
       { weight: "50g", price: 35 },
@@ -98,6 +105,7 @@ export const products: Product[] = [
     name: "Spicy Jackfruit Chips",
     description: "Premium jackfruit chips tossed in a zesty, spicy masala.",
     image: "/2.jpeg",
+    gallery: ["/2.jpeg", "/3.jpeg", "/4.jpeg", "/5.jpg", "/2.jpeg"],
     category: "Jackfruit Chips",
     variants: [
       { weight: "50g", price: 60 },
@@ -112,6 +120,7 @@ export const products: Product[] = [
     name: "Normal Jackfruit Chips",
     description: "Authentic, naturally sweet and salty jackfruit chips crisp fried to perfection.",
     image: "/2.jpeg",
+    gallery: ["/2.jpeg", "/5.jpg", "/4.jpeg", "/3.jpeg", "/2.jpeg"],
     category: "Jackfruit Chips",
     variants: [
       { weight: "50g", price: 55 },

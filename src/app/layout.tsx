@@ -3,6 +3,7 @@ import { CartProvider } from "@/context/CartContext";
 import TopBar from "@/components/layout/TopBar";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import PromoModal from "@/components/ui/PromoModal";
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
@@ -11,11 +12,11 @@ const montserrat = Montserrat({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title:
-    "ClickQura IT Solution – Reliable IT Services for Businesses & Institutions",
+    "AKOD FOOD | The Premium Heritage Collection",
   description:
-    "ClickQura IT Solution provides expert IT services including AMC, hardware & software solutions, asset rentals, consultancy, cloud, and security systems. We serve SMBs, educational institutions, corporates, and industries like healthcare and manufacturing with professional support and innovative IT solutions.",
+    "Elevating South Indian snacking to an art form. Discover our meticulously crafted chips, born from pristine ingredients and generations of mastery.",
   keywords:
-    "ClickQura IT Solution, IT services, Annual Maintenance Contract, AMC services, hardware support, software support, IT rentals, IT asset rental, IT consultancy, IT procurement, computer repairs, IT upgrades, biometric systems, CCTV installation, cloud services, email setup, managed IT services, business IT support, educational IT solutions, corporate IT solutions, IT for healthcare, IT for manufacturing, small business IT support, India IT solutions",
+    "AKOD FOOD, Premium Chips, Banana Chips, Jackfruit Chips, Tapioca Chips, Luxury Snacking, Kerala Shacks",
 };
 
 export default function RootLayout({
@@ -33,6 +34,7 @@ export default function RootLayout({
               <Navbar />
               <main className="flex-1 w-full">{children}</main>
               <Footer />
+              <PromoModal />
             </div>
           </CartProvider>
         </UIProvider>

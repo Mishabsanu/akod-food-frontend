@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Lock } from "lucide-react";
 
 export default function CheckoutPage() {
-    const { cartTotal, clearCart } = useCart();
+    const { cartTotal, cartSubtotal, platformFee, deliveryFee, clearCart } = useCart();
     const router = useRouter();
     const [isProcessing, setIsProcessing] = useState(false);
     
@@ -271,17 +271,25 @@ export default function CheckoutPage() {
                             {/* Totals */}
                             <div className="border-t border-black pt-6 mb-8 text-sm font-light space-y-4">
                                 <div className="flex justify-between items-end text-gray-500">
-                                    <span className="uppercase tracking-[0.2em] text-base">Subtotal</span>
-                                    <span>₹{cartTotal}</span>
+                                    <span className="uppercase tracking-[0.2em] text-[10px]">Subtotal</span>
+                                    <span>₹{cartSubtotal}</span>
+                                </div>
+                                <div className="flex justify-between items-end text-gray-500">
+                                    <span className="uppercase tracking-[0.2em] text-[10px]">Platform Fee</span>
+                                    <span>₹{platformFee}</span>
+                                </div>
+                                <div className="flex justify-between items-end text-gray-500">
+                                    <span className="uppercase tracking-[0.2em] text-[10px]">Delivery Charge</span>
+                                    <span>{deliveryFee === 0 ? "Complimentary" : `₹${deliveryFee}`}</span>
                                 </div>
                                 {discountApplied > 0 && (
                                     <div className="flex justify-between items-end text-green-700 font-medium">
-                                        <span className="uppercase tracking-[0.2em] text-base">Privilege Applied ({couponCode.toUpperCase()})</span>
+                                        <span className="uppercase tracking-[0.2em] text-[10px]">Privilege Applied ({couponCode.toUpperCase()})</span>
                                         <span>- ₹{discountApplied.toFixed(0)}</span>
                                     </div>
                                 )}
                                 <div className="flex justify-between items-end text-gray-900 font-medium pt-2">
-                                    <span className="uppercase tracking-[0.2em] text-base">Total to Pay</span>
+                                    <span className="uppercase tracking-[0.2em] text-[10px]">Total to Pay</span>
                                     <span className="text-3xl font-serif font-light leading-none">₹{finalTotal.toFixed(0)}</span>
                                 </div>
                             </div>

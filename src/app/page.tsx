@@ -4,6 +4,8 @@ import Link from "next/link";
 import { products } from "@/data/products";
 import ProductCard from "@/components/ui/ProductCard";
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function Home() {
   const curatedProducts = products.slice(0, 4);
@@ -22,57 +24,125 @@ export default function Home() {
     transition: { staggerChildren: 0.15 }
   };
 
+  const slides = [
+    {
+      id: 1,
+      tag: "The Heritage Collection",
+      title: "A Symphony <br /> of Crunch.",
+      desc: "Elevating South Indian snacking to an art form. Discover our meticulously crafted chips, born from pristine ingredients and generations of mastery.",
+      img: "/hero-1.png",
+      linkText: "Explore The Atelier"
+    },
+    {
+      id: 2,
+      tag: "Wood-Fired Mastery",
+      title: "Alchemists <br /> of Flavor.",
+      desc: "Experience Jackfruit like never before. Hand-selected from the lush estates of Kerala and tossed in custom-blended spices.",
+      img: "/hero-2.png",
+      linkText: "Acquire Jackfruit"
+    },
+    {
+      id: 3,
+      tag: "The Authentic Process",
+      title: "Elegance in <br /> Every Bag.",
+      desc: "We refuse to automate the soul out of our process. Every batch is a small-batch, artisanal undertaking crafted for the sophisticated palate.",
+      img: "/hero-3.png",
+      linkText: "View Collection"
+    }
+  ];
+
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % slides.length);
+    }, 6000);
+    return () => clearInterval(timer);
+  }, [slides.length]);
+
+  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % slides.length);
+  const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+
   return (
     <div className="flex flex-col w-full bg-[#faf9f6] selection:bg-brand-primary/20 selection:text-black min-h-screen">
 
-      {/* Mounted Photographic Hero */}
-      <section className="relative w-full pt-10 pb-20 px-6 sm:px-12 lg:px-24 max-w-[1600px] mx-auto min-h-[85vh] flex flex-col justify-center">
-        <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-24">
-          <div className="flex-1 order-2 lg:order-1 flex flex-col justify-center z-10 w-full">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1.2, ease: "easeOut" }}
-            >
-              <p className="text-[10px] uppercase tracking-[0.4em] mb-6 font-medium text-brand-primary">
-                The Heritage Collection
-              </p>
-              <h1 className="text-5xl md:text-7xl lg:text-[7rem] font-serif font-light mb-8 text-gray-900 leading-[1] tracking-tight">
-                A Symphony <br /> of Crunch.
-              </h1>
-              <p className="text-base text-gray-500 font-light leading-relaxed mb-10 max-w-md">
-                Elevating South Indian snacking to an art form. Discover our meticulously crafted chips, born from pristine ingredients and generations of mastery.
-              </p>
-              <Link
-                href="/products"
-                className="group inline-flex items-center gap-6"
-              >
-                <div className="flex items-center justify-center w-14 h-14 rounded-full border border-gray-300 group-hover:border-black transition-colors duration-500">
-                  <div className="w-1.5 h-1.5 rounded-full bg-black"></div>
-                </div>
-                <span className="text-[11px] uppercase tracking-[0.25em] text-gray-900 font-medium">
-                  Explore The Atelier
-                </span>
-              </Link>
-            </motion.div>
-          </div>
+      {/* Cinematic Full-Width Hero Carousel */}
+      <section className="relative w-full h-[85vh] md:h-[95vh] overflow-hidden bg-black flex items-center justify-center group">
+        
+        {slides.map((slide, idx) => (
+          <div 
+            key={slide.id}
+            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${idx === currentSlide ? "opacity-100 z-10" : "opacity-0 z-0"}`}
+          >
+            {/* Background Image */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={slide.img}
+              alt={slide.tag}
+              className={`w-full h-full object-cover transition-transform duration-[6s] ease-out ${idx === currentSlide ? "scale-105" : "scale-100"}`}
+            />
+            {/* Dark Gradient Overlay for perfect text contrast */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+            <div className="absolute inset-0 bg-black/20"></div>
 
-          <div className="flex-1 order-1 lg:order-2 w-full">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 1.5, delay: 0.2, ease: "easeOut" }}
-              className="relative w-full aspect-[4/5] md:aspect-[3/4] lg:aspect-[4/5] lg:max-h-[80vh] overflow-hidden shadow-2xl"
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/1.jpeg"
-                alt="AKOD Culinary Excellence"
-                className="w-full h-full object-cover scale-[1.05] hover:scale-100 transition-transform duration-[4s] ease-out"
-              />
-            </motion.div>
+            {/* Slide Content */}
+            <div className="absolute inset-x-0 bottom-0 pb-24 md:pb-32 px-6 sm:px-12 lg:px-24">
+              <div className="max-w-[1400px] mx-auto text-white">
+                <div className={`transition-all duration-1000 delay-300 ${idx === currentSlide ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}>
+                  <p className="text-[10px] uppercase tracking-[0.4em] mb-4 font-medium text-white/70">
+                    {slide.tag}
+                  </p>
+                  <h1 
+                    className="text-5xl md:text-7xl lg:text-[7rem] font-serif font-light mb-6 leading-[1.1] tracking-tight drop-shadow-lg"
+                    dangerouslySetInnerHTML={{ __html: slide.title }}
+                  />
+                  <p className="text-sm md:text-base text-gray-200 font-light leading-relaxed mb-10 max-w-lg drop-shadow-md">
+                    {slide.desc}
+                  </p>
+                  <Link
+                    href="/products"
+                    className="group/btn inline-flex items-center gap-6"
+                  >
+                    <div className="flex items-center justify-center w-14 h-14 rounded-full border border-white/50 group-hover/btn:border-white transition-colors duration-500 bg-black/20 backdrop-blur-sm">
+                      <div className="w-1.5 h-1.5 rounded-full bg-white transition-transform duration-500 group-hover/btn:scale-150"></div>
+                    </div>
+                    <span className="text-[11px] uppercase tracking-[0.25em] text-white font-medium group-hover/btn:tracking-[0.3em] transition-all duration-500">
+                      {slide.linkText}
+                    </span>
+                  </Link>
+                </div>
+              </div>
+            </div>
           </div>
+        ))}
+
+        {/* Global Navigation Controls - Bottom Right */}
+        <div className="absolute right-6 md:right-12 bottom-12 z-30 flex items-center space-x-3">
+          <button 
+            onClick={prevSlide}
+            className="p-3 border border-white/30 rounded-full text-white/70 hover:bg-white hover:text-black hover:border-white transition-all duration-300 backdrop-blur-md bg-black/10"
+          >
+            <ChevronLeft className="w-5 h-5" strokeWidth={1} />
+          </button>
+          <button 
+            onClick={nextSlide}
+            className="p-3 border border-white/30 rounded-full text-white/70 hover:bg-white hover:text-black hover:border-white transition-all duration-300 backdrop-blur-md bg-black/10"
+          >
+            <ChevronRight className="w-5 h-5" strokeWidth={1} />
+          </button>
         </div>
+
+        {/* Dash Indicators */}
+        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-30 flex space-x-3">
+          {slides.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setCurrentSlide(idx)}
+              className={`h-[2px] transition-all duration-500 ${idx === currentSlide ? "w-12 bg-white" : "w-6 bg-white/30 hover:bg-white/50"}`}
+            />
+          ))}
+        </div>
+
       </section>
 
       {/* The Manifesto / Read Our Story (Redesigned Editorial Style) */}
