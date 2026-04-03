@@ -24,7 +24,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col w-full bg-[#faf9f6] selection:bg-brand-primary/20 selection:text-black min-h-screen">
-      
+
       {/* Mounted Photographic Hero */}
       <section className="relative w-full pt-10 pb-20 px-6 sm:px-12 lg:px-24 max-w-[1600px] mx-auto min-h-[85vh] flex flex-col justify-center">
         <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-24">
@@ -56,7 +56,7 @@ export default function Home() {
               </Link>
             </motion.div>
           </div>
-          
+
           <div className="flex-1 order-1 lg:order-2 w-full">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
@@ -77,7 +77,7 @@ export default function Home() {
 
       {/* The Manifesto / Read Our Story (Redesigned Editorial Style) */}
       <section id="story" className="py-24 md:py-40 px-6 sm:px-12 max-w-[1400px] mx-auto bg-[#faf9f6]">
-        <motion.div 
+        <motion.div
           {...fadeUp}
           className="flex flex-col md:flex-row items-start lg:items-center gap-12 lg:gap-24"
         >
@@ -122,16 +122,16 @@ export default function Home() {
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8"
           >
             {curatedProducts.map((product, index) => (
-              <motion.div 
-                variants={fadeUp} 
+              <motion.div
+                variants={fadeUp}
                 key={product.id}
-                className={index % 2 === 0 ? "md:-translate-y-8" : "md:translate-y-8"} 
+                className={index % 2 === 0 ? "md:-translate-y-8" : "md:translate-y-8"}
               >
                 <ProductCard product={product} />
               </motion.div>
             ))}
           </motion.div>
-          
+
           <div className="mt-20 text-center md:hidden">
             <Link href="/products" className="text-[10px] uppercase tracking-[0.2em] font-light text-black hover:text-brand-primary transition-colors border-b border-black pb-1">
               View Collection
@@ -158,18 +158,18 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-y-16 lg:gap-x-12 relative">
             {/* Subtle dividing line on desktop */}
             <div className="hidden lg:block absolute top-[80px] left-0 w-full h-[1px] bg-gray-200"></div>
-            
+
             {[
               { num: "01", title: "Hand Selection", desc: "Every ingredient is scrutinized. Only the most pristine Nendran bananas and flawless tapioca roots pass our rigorous selection process." },
               { num: "02", title: "Precision Slicing", desc: "Calibrated to the millimeter, our specialized slicing technique ensures a uniform surface area for perfectly consistent crispness." },
               { num: "03", title: "Wood-fire Kettles", desc: "We reject industrial fryers. Small batches are slow-fried over open wood fires in traditional brass Urulis, locking in a distinct heritage flavor." }
             ].map((step, idx) => (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.8, delay: idx * 0.2, ease: "easeOut" }}
-                key={idx} 
+                key={idx}
                 className="flex flex-col relative z-10 pt-4"
               >
                 <div className="text-7xl md:text-8xl font-serif font-light text-gray-200 mb-8 tracking-tighter">
@@ -188,15 +188,15 @@ export default function Home() {
       {/* Categories / Editorials - Enhanced Sourcing */}
       <section className="py-24 md:py-32 bg-white">
         <div className="max-w-[1400px] mx-auto px-6 sm:px-12">
-          <motion.div 
+          <motion.div
             variants={stagger}
             initial="initial"
             whileInView="whileInView"
             className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center"
           >
             <motion.div variants={fadeUp} className="relative h-[500px] md:h-[700px] bg-[#faf9f6] w-full overflow-hidden">
-               {/* eslint-disable-next-line @next/next/no-img-element */}
-               <img src="/4.jpeg" alt="Spices" className="absolute inset-0 w-full h-full object-cover hover:scale-110 transition-transform duration-[3s] ease-out" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/4.jpeg" alt="Spices" className="absolute inset-0 w-full h-full object-cover hover:scale-110 transition-transform duration-[3s] ease-out" />
             </motion.div>
             <motion.div variants={fadeUp} className="flex flex-col justify-center max-w-lg lg:ml-10">
               <span className="text-[10px] uppercase tracking-[0.2em] font-light text-gray-400 mb-6 block">The AKOD Difference</span>
@@ -222,9 +222,9 @@ export default function Home() {
           <h2 className="text-2xl font-serif text-gray-900 mb-4 font-light">Join the Atelier</h2>
           <p className="text-sm text-gray-500 font-light mb-10">Receive early access to seasonal collections and exclusive curations.</p>
           <div className="flex w-full items-center border-b border-gray-300 focus-within:border-black transition-colors px-2 pb-2">
-            <input 
-              type="email" 
-              placeholder="Email Address" 
+            <input
+              type="email"
+              placeholder="Email Address"
               className="w-full bg-transparent focus:outline-none text-sm font-light placeholder-gray-400"
             />
             <button className="px-4 text-[10px] uppercase tracking-[0.2em] hover:text-brand-primary transition-colors font-medium">
