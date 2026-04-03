@@ -43,8 +43,9 @@ export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClos
         setTimeout(() => {
             setIsLoading(false);
             if (nextStep === "COMPLETE") {
+                localStorage.setItem("akodAuth", "true");
                 onClose();
-                router.push("/"); // Redirect home as requested
+                window.location.href = "/profile"; 
             } else {
                 setStep(nextStep);
             }

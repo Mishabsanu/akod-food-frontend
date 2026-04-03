@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import { ShoppingBag, User, Search, Menu } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState,useEffect  } from "react";
 import CartDrawer from "../ui/CartDrawer";
 import AuthModal from "../ui/AuthModal";
 
@@ -14,6 +14,11 @@ export default function Navbar() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [isAuthOpen, setIsAuthOpen] = useState(false);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+    useEffect(() => {
+        setIsAuthenticated(localStorage.getItem("akodAuth") === "true");
+    }, []);
 
     const links = [
         { name: "Home", path: "/" },
@@ -82,9 +87,15 @@ export default function Navbar() {
                                 />
                             </div>
 
-                            <button onClick={() => setIsAuthOpen(true)} className="text-gray-800 hover:text-gray-500 transition-colors">
-                                <User className="h-5 w-5" strokeWidth={1.25} />
-                            </button>
+                            {isAuthenticated ? (
+                                <Link href="/profile" className="text-gray-800 hover:text-gray-500 transition-colors">
+                                    <User className="h-5 w-5" strokeWidth={1.25} />
+                                </Link>
+                            ) : (
+                                <button onClick={() => setIsAuthOpen(true)} className="text-gray-800 hover:text-gray-500 transition-colors">
+                                    <User className="h-5 w-5" strokeWidth={1.25} />
+                                </button>
+                            )}
 
                             <button
                                 onClick={() => setIsCartOpen(true)}
