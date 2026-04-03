@@ -39,7 +39,7 @@ export const products: Product[] = [
     id: "p2",
     name: "Normal Banana Chips",
     description: "Classic salted Kerala style banana chips fried in fresh coconut oil.",
-    image: "/5.jpeg",
+    image: "/5.jpg",
     category: "Banana Chips",
     variants: defaultVariants
   },
@@ -69,7 +69,7 @@ export const products: Product[] = [
     id: "p5",
     name: "Normal Tapioca Chips",
     description: "Perfectly salted, crunchy tapioca chips.",
-    image: "/5.jpeg",
+    image: "/5.jpg",
     category: "Tapioca Chips",
     variants: [
       { weight: "50g", price: 30 },

@@ -1,9 +1,10 @@
 export default function TopBar() {
     return (
-        <div className="bg-brand-text text-white py-2 px-4 text-center text-xs md:text-sm font-medium tracking-widest uppercase relative z-50">
-            <span className="text-brand-primary mr-2">✦</span>
-            Special Offer: Get 20% Off on all authentic chips with code <span className="font-bold text-brand-primary ml-1">AKOD20</span>
-            <span className="text-brand-primary ml-2">✦</span>
+        <div className="bg-[#1a1a1a] text-white py-3 px-6 flex justify-center items-center text-[10px] sm:text-[11px] font-light tracking-[0.25em] uppercase border-b border-white/10 relative z-50">
+            <span className="opacity-90">
+                Complimentary express shipping on all orders over ₹1500
+            </span>
         </div>
     );
 }
+

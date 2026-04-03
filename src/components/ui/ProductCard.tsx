@@ -21,57 +21,67 @@ export default function ProductCard({ product }: { product: Product }) {
     };
 
     return (
-        <div onClick={handleNavigate} className="group flex flex-col bg-brand-box rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-brand-bgAccent cursor-pointer h-full">
-            <div className="relative h-[320px] w-full overflow-hidden bg-[#fbfbfb]">
+        <div onClick={handleNavigate} className="group flex flex-col cursor-pointer bg-white relative pb-10">
+            {/* Signature Marker */}
+            {product.id === "p1" || product.id === "p7" ? (
+                <div className="absolute top-4 left-0 z-10 text-[9px] font-light uppercase tracking-[0.2em] text-gray-400 rotate-[-90deg] origin-top-left translate-y-24">
+                    Signature
+                </div>
+            ) : null}
+
+            {/* Image Container */}
+            <div className="relative h-[380px] w-full overflow-hidden bg-[#faf9f6]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                     src={product.image}
                     alt={product.name}
-                    className="h-full w-full object-contain p-6 transition-transform duration-700 group-hover:scale-110"
+                    className="h-full w-full object-cover transition-transform duration-1000 ease-in-out group-hover:scale-105"
                 />
-                <div className="absolute top-4 left-4 z-10 bg-brand-primary text-white text-xs font-bold px-3 py-1 uppercase tracking-widest rounded-full shadow-md">
-                    {product.category}
-                </div>
-            </div>
-
-            <div className="flex flex-col flex-grow p-6">
-                <h3 className="text-lg font-serif font-semibold text-brand-text mb-2 line-clamp-1 group-hover:text-brand-primary transition-colors">
-                    {product.name}
-                </h3>
-                <p className="text-sm text-gray-500 font-light mb-6 flex-grow line-clamp-2">
-                    {product.description}
-                </p>
-
-                <div className="flex flex-col space-y-4 pt-4 border-t border-gray-100 mt-auto">
-                    <div className="flex items-center justify-between">
-                        <span className="text-xl font-medium text-brand-text">
-                            ₹{selectedVariant.price}
-                        </span>
-                        <select
-                            className="bg-brand-bgLight border border-gray-200 text-brand-text text-sm rounded-lg focus:ring-brand-primary focus:border-brand-primary block p-2 transition-colors cursor-pointer"
-                            value={selectedVariantIdx}
-                            onClick={(e) => e.stopPropagation()}
-                            onChange={(e) => {
-                                e.stopPropagation();
-                                setSelectedVariantIdx(Number(e.target.value));
-                            }}
-                        >
-                            {product.variants.map((v, idx) => (
-                                <option key={v.weight} value={idx}>
-                                    {v.weight}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <button
+                
+                {/* Fast Add Overlay */}
+                <div className="absolute inset-x-0 bottom-0 p-6 opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 ease-out flex justify-center bg-gradient-to-t from-black/20 to-transparent">
+                    <button 
                         onClick={handleAdd}
-                        className="w-full bg-brand-text text-white py-3 px-4 rounded-xl text-sm font-semibold uppercase tracking-wider hover:bg-brand-primary transition-colors duration-300"
+                        className="bg-black text-white text-[10px] uppercase tracking-[0.2em] font-light py-3 px-8 hover:bg-brand-primary transition-colors"
                     >
-                        Add to Cart
+                        Quick Add
                     </button>
                 </div>
             </div>
+
+            {/* Info Container */}
+            <div className="flex flex-col pt-6 text-center">
+                <span className="text-[10px] text-gray-400 uppercase tracking-[0.2em] mb-3">{product.category}</span>
+                <h3 className="text-lg font-serif font-normal text-gray-900 mb-2">
+                    {product.name}
+                </h3>
+                
+                <div className="flex items-center justify-center space-x-4">
+                    <span className="text-sm font-light text-gray-900">
+                        ₹{selectedVariant.price}
+                    </span>
+                    <span className="text-gray-300">|</span>
+                    <select
+                        className="bg-transparent border-none text-gray-500 text-[11px] tracking-[0.1em] cursor-pointer outline-none hover:text-black transition-colors"
+                        value={selectedVariantIdx}
+                        onClick={(e) => e.stopPropagation()}
+                        onChange={(e) => {
+                            e.stopPropagation();
+                            setSelectedVariantIdx(Number(e.target.value));
+                        }}
+                    >
+                        {product.variants.map((v, idx) => (
+                            <option key={v.weight} value={idx}>
+                                {v.weight}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            </div>
+            
+            {/* Minimalist Hover Line */}
+            <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-black scale-x-0 group-hover:scale-x-100 origin-center transition-transform duration-700 ease-in-out mx-8"></div>
         </div>
     );
 }
+
