@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Product } from "@/data/products";
 import { useCart } from "@/context/CartContext";
 import { useRouter } from "next/navigation";
+import StarRating from "./StarRating";
 
 export default function ProductCard({ product }: { product: Product }) {
     const { addToCart } = useCart();
@@ -55,6 +56,10 @@ export default function ProductCard({ product }: { product: Product }) {
                 <h3 className="text-lg font-serif font-normal text-gray-900 mb-2">
                     {product.name}
                 </h3>
+                
+                <div className="flex justify-center mb-4">
+                    <StarRating rating={product.rating} count={product.reviewsCount} showText size={10} />
+                </div>
                 
                 <div className="flex items-center justify-center space-x-4">
                     <span className="text-sm font-light text-gray-900">

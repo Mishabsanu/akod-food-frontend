@@ -7,6 +7,8 @@ import { ArrowLeft, Minus, Plus } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import ProductCard from "@/components/ui/ProductCard";
+import StarRating from "@/components/ui/StarRating";
+import ReviewSection from "@/components/ui/ReviewSection";
 
 export default function ProductViewPage({ params }: { params: { id: string } }) {
     const product = products.find((p) => p.id === params.id);
@@ -94,8 +96,11 @@ export default function ProductViewPage({ params }: { params: { id: string } }) 
 
                         <div className="border-t border-gray-200 py-8">
                             <span className="text-[10px] uppercase tracking-[0.3em] text-gray-400 block mb-6">Valuation</span>
-                            <div className="text-3xl font-serif text-gray-900 font-light">
-                                ₹{selectedVariant.price}
+                            <div className="flex items-center justify-between">
+                                <div className="text-3xl font-serif text-gray-900 font-light">
+                                    ₹{selectedVariant.price}
+                                </div>
+                                <StarRating rating={product.rating} count={product.reviewsCount} showText size={12} />
                             </div>
                         </div>
 
@@ -164,9 +169,15 @@ export default function ProductViewPage({ params }: { params: { id: string } }) 
                                 <span className="w-1 h-1 rounded-full bg-gray-400"></span> Absolute Satisfaction Guarantee
                             </p>
                         </div>
-
                     </div>
                 </div>
+
+                {/* Review Section */}
+                <ReviewSection 
+                    productId={product.id} 
+                    initialRating={product.rating} 
+                    initialReviewsCount={product.reviewsCount} 
+                />
 
                 {/* Related Products Section */}
                 <div className="pt-20 border-t border-gray-100 pb-16">

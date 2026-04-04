@@ -11,6 +11,8 @@ export interface Product {
   gallery?: string[];
   category: string;
   variants: ProductVariant[];
+  rating: number;
+  reviewsCount: number;
 }
 
 const defaultVariants: ProductVariant[] = [
@@ -35,7 +37,9 @@ export const products: Product[] = [
       { weight: "250g", price: 200 },
       { weight: "500g", price: 380 },
       { weight: "1kg", price: 700 }
-    ]
+    ],
+    rating: 4.8,
+    reviewsCount: 124
   },
   {
     id: "p2",
@@ -44,7 +48,9 @@ export const products: Product[] = [
     image: "/5.jpg",
     gallery: ["/5.jpg", "/4.jpeg", "/3.jpeg", "/2.jpeg", "/5.jpg"],
     category: "Banana Chips",
-    variants: defaultVariants
+    variants: defaultVariants,
+    rating: 4.9,
+    reviewsCount: 210
   },
   {
     id: "p3",
@@ -53,7 +59,9 @@ export const products: Product[] = [
     image: "/3.jpeg",
     gallery: ["/3.jpeg", "/5.jpg", "/4.jpeg", "/2.jpeg", "/3.jpeg"],
     category: "Banana Chips",
-    variants: defaultVariants
+    variants: defaultVariants,
+    rating: 4.7,
+    reviewsCount: 89
   },
   {
     id: "p4",
@@ -68,7 +76,9 @@ export const products: Product[] = [
       { weight: "250g", price: 150 },
       { weight: "500g", price: 290 },
       { weight: "1kg", price: 550 }
-    ]
+    ],
+    rating: 4.6,
+    reviewsCount: 56
   },
   {
     id: "p5",
@@ -83,7 +93,9 @@ export const products: Product[] = [
       { weight: "250g", price: 130 },
       { weight: "500g", price: 250 },
       { weight: "1kg", price: 480 }
-    ]
+    ],
+    rating: 4.8,
+    reviewsCount: 92
   },
   {
     id: "p6",
@@ -98,7 +110,9 @@ export const products: Product[] = [
       { weight: "250g", price: 140 },
       { weight: "500g", price: 270 },
       { weight: "1kg", price: 500 }
-    ]
+    ],
+    rating: 4.5,
+    reviewsCount: 43
   },
   {
     id: "p7",
@@ -113,7 +127,9 @@ export const products: Product[] = [
       { weight: "250g", price: 260 },
       { weight: "500g", price: 500 },
       { weight: "1kg", price: 950 }
-    ]
+    ],
+    rating: 4.9,
+    reviewsCount: 156
   },
   {
     id: "p8",
@@ -128,6 +144,8 @@ export const products: Product[] = [
       { weight: "250g", price: 240 },
       { weight: "500g", price: 460 },
       { weight: "1kg", price: 900 }
-    ]
+    ],
+    rating: 4.8,
+    reviewsCount: 112
   }
 ];
