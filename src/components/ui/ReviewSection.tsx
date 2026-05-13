@@ -29,11 +29,7 @@ export default function ReviewSection({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
 
-  useEffect(() => {
-    fetchReviews();
-  }, [productId]);
-
-  const fetchReviews = async () => {
+  const fetchReviews = React.useCallback(async () => {
     try {
       const res = await customerApi.getReviews(productId);
       setReviews(res.data.data || []);
@@ -42,7 +38,11 @@ export default function ReviewSection({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [productId]);
+
+  useEffect(() => {
+    fetchReviews();
+  }, [fetchReviews]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -191,7 +191,7 @@ export default function ReviewSection({
                     <StarRating rating={review.rating} size={12} />
                   </div>
                   <p className="text-gray-600 font-light text-base leading-relaxed italic">
-                     "{review.comment}"
+                     &quot;{review.comment}&quot;
                   </p>
                 </div>
               </div>

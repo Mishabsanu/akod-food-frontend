@@ -129,7 +129,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                         </div>
                         <div className="space-y-3">
                             <p className="text-[9px] text-white/50 leading-loose tracking-widest uppercase italic">
-                                "Excellence is not an act, but a habit."
+                                &quot;Excellence is not an act, but a habit.&quot;
                             </p>
                             <div className="h-[1px] w-8 bg-brand-primary" />
                         </div>
