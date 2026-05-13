@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Product } from "@/data/products";
 import { useCart } from "@/context/CartContext";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import StarRating from "./StarRating";
 
 export default function ProductCard({ product }: { product: any }) {
@@ -34,11 +35,11 @@ export default function ProductCard({ product }: { product: any }) {
 
             {/* Image Container */}
             <div className="relative h-[380px] w-full overflow-hidden bg-[#faf9f6] flex items-center justify-center p-8">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                     src={product.images?.[0] || "/placeholder.png"}
                     alt={product.name}
-                    className="max-h-full max-w-full object-contain transition-transform duration-1000 ease-in-out group-hover:scale-105"
+                    fill
+                    className="max-h-full max-w-full object-contain transition-transform duration-1000 ease-in-out group-hover:scale-105 p-8"
                 />
                 
                 {/* Fast Add Overlay */}

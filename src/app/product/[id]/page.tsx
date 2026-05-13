@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useCart } from "@/context/CartContext";
 import { ArrowLeft, Minus, Plus, Loader2 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import ProductCard from "@/components/ui/ProductCard";
 import StarRating from "@/components/ui/StarRating";
@@ -89,17 +90,17 @@ export default function ProductViewPage({ params }: { params: { id: string } }) 
                                 className={`w-16 h-20 md:w-20 md:h-24 flex-shrink-0 border transition-all duration-300 ${activeImage === img ? 'border-black' : 'border-gray-200 opacity-50 hover:opacity-100 hover:border-gray-400'}`}
                             >
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src={img} alt={`${product.name} ${idx}`} className="w-full h-full object-cover" />
+                                <Image src={img} alt={`${product.name} ${idx}`} width={80} height={96} className="w-full h-full object-cover" />
                             </button>
                         ))}
                     </div>
 
                     {/* Main Image */}
                     <div className="flex-1 bg-white border border-gray-100 p-4 lg:p-12 relative h-[50vh] lg:h-[70vh] flex items-center justify-center overflow-hidden group order-1 lg:order-2">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
+                        <Image
                             src={activeImage}
                             alt={product.name}
+                            fill
                             className="w-full h-full object-contain cursor-zoom-in transition-transform duration-700 ease-out group-hover:scale-[1.35]"
                         />
                         <div className="absolute top-8 left-8 text-[9px] uppercase tracking-[0.4em] text-gray-400 rotate-[-90deg] origin-top-left translate-y-12 z-10 hidden lg:block">

@@ -2,6 +2,7 @@
 
 import { useCart } from "@/context/CartContext";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, Minus, Plus, ShoppingBag, ShieldCheck, Truck } from "lucide-react";
 
 export default function CartPage() {
@@ -45,10 +46,12 @@ export default function CartPage() {
                             {items.map((item) => (
                                 <div key={item.cartId} className="bg-white border border-gray-50 p-4 md:p-6 flex items-center gap-6 transition-all hover:border-gray-100 group">
                                     <div className="w-20 h-24 bg-[#faf9f6] flex-shrink-0 overflow-hidden relative">
-                                        <img 
+                                        <Image 
                                             src={item.product.images?.[0] || item.product.image || "/placeholder.png"} 
                                             alt={item.product.name} 
                                             className="w-full h-full object-contain p-2"
+                                            width={80}
+                                            height={96}
                                         />
                                     </div>
                                     

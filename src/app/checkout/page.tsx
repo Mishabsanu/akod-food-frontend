@@ -5,6 +5,7 @@ import { useCart } from "@/context/CartContext";
 import { customerApi } from "@/lib/api";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { 
     MapPin, 
     Plus, 
@@ -317,10 +318,12 @@ export default function CheckoutPage() {
                                             <p className="text-xs text-gray-500 mt-1">UPI, Net Banking, Cards & Wallets</p>
                                         </div>
                                     </div>
-                                    <img 
+                                    <Image 
                                         src="https://upload.wikimedia.org/wikipedia/commons/8/89/Razorpay_logo.svg" 
-                                        className="h-4 opacity-70 group-hover:opacity-100 transition-opacity"
+                                        className="h-4 w-auto opacity-70 group-hover:opacity-100 transition-opacity"
                                         alt="Razorpay" 
+                                        width={100}
+                                        height={16}
                                     />
                                 </div>
                                 {/* Decorative elements */}

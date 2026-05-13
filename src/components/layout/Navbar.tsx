@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useCart } from "@/context/CartContext";
 import { ShoppingBag, User, Search, Menu, ChevronDown } from "lucide-react";
 import { usePathname } from "next/navigation";
@@ -117,18 +118,20 @@ export default function Navbar() {
                         {/* Center: Logo */}
                         <div className="flex-shrink-0 flex justify-center">
                             <Link href="/" className="px-6 border-x border-gray-200 py-2 hidden sm:block">
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img
+                                <Image
                                     src="/logo.jpg"
                                     alt="AKOD"
-                                    className="h-20 md:h-20 w-auto object-contain"
+                                    width={80}
+                                    height={80}
+                                    className="h-20 w-auto object-contain"
                                 />
                             </Link>
                             <Link href="/" className="sm:hidden">
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img
+                                <Image
                                     src="/logo.jpg"
                                     alt="AKOD"
+                                    width={32}
+                                    height={32}
                                     className="h-8 w-auto object-contain"
                                 />
                             </Link>

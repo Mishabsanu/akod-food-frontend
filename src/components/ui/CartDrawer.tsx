@@ -4,6 +4,7 @@ import { useCart } from "@/context/CartContext";
 import { X, Minus, Plus, ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
     const { items, updateQuantity, removeFromCart, cartSubtotal } = useCart();
@@ -84,10 +85,12 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                                 {items.map((item) => (
                                     <div key={item.cartId} className="flex gap-6 group">
                                         <div className="w-24 h-32 bg-[#faf9f6] flex-shrink-0 overflow-hidden relative">
-                                            <img 
+                                            <Image 
                                                 src={item.product.images?.[0] || item.product.image || "/placeholder.png"} 
                                                 alt={item.product.name} 
                                                 className="w-full h-full object-contain p-2"
+                                                width={96}
+                                                height={128}
                                             />
                                         </div>
                                         <div className="flex-1 flex flex-col justify-between py-1">

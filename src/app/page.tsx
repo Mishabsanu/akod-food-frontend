@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { products } from "@/data/products";
 import ProductCard from "@/components/ui/ProductCard";
 import { motion } from "framer-motion";
@@ -98,10 +99,12 @@ export default function Home() {
           >
             {/* Background Image */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src={slide.img}
               alt={slide.tag}
+              fill
               className={`w-full h-full object-cover transition-transform duration-[6s] ease-out ${idx === currentSlide ? "scale-105" : "scale-100"}`}
+              priority={idx === 0}
             />
             {/* Dark Gradient Overlay for perfect text contrast */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
@@ -295,9 +298,10 @@ export default function Home() {
                 viewport={{ once: true }}
               >
                 <Link href={`/products?category=${cat._id}`} className="group block relative aspect-square overflow-hidden bg-gray-50 rounded-lg">
-                  <img 
+                  <Image 
                     src={cat.image || "/placeholder.png"} 
                     alt={cat.name} 
+                    fill
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />
                   <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-500"></div>
@@ -321,7 +325,7 @@ export default function Home() {
             className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center"
           >
             <motion.div variants={fadeUp} className="relative h-[500px] md:h-[700px] bg-white w-full overflow-hidden rounded-xl shadow-2xl">
-              <img src="/4.jpeg" alt="Natural Ingredients" className="absolute inset-0 w-full h-full object-cover hover:scale-110 transition-transform duration-[3s] ease-out" />
+              <Image src="/4.jpeg" alt="Natural Ingredients" fill className="absolute inset-0 w-full h-full object-cover hover:scale-110 transition-transform duration-[3s] ease-out" />
             </motion.div>
             <motion.div variants={fadeUp} className="flex flex-col justify-center max-w-lg lg:ml-10">
               <span className="text-[10px] uppercase tracking-[0.2em] font-light text-gray-400 mb-6 block">Why Choose AKOD</span>
