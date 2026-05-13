@@ -17,7 +17,9 @@ import {
     Loader2
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { toast } from "sonner";
+import { useCallback } from "react";
 
 export default function OrderDetailsPage() {
     const params = useParams();
@@ -25,11 +27,7 @@ export default function OrderDetailsPage() {
     const [order, setOrder] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        fetchOrderDetails();
-    }, [params.id]);
-
-    const fetchOrderDetails = async () => {
+    const fetchOrderDetails = useCallback(async () => {
         try {
             const res = await customerApi.getOrderDetails(params.id as string);
             setOrder(res.data.data);
@@ -38,7 +36,11 @@ export default function OrderDetailsPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [params.id]);
+
+    useEffect(() => {
+        fetchOrderDetails();
+    }, [fetchOrderDetails]);
 
     if (loading) return (
         <div className="min-h-screen flex items-center justify-center bg-[#faf9f6]">
@@ -127,8 +129,8 @@ export default function OrderDetailsPage() {
                             <div className="space-y-8">
                                 {order.items.map((item: any, idx: number) => (
                                     <div key={idx} className="flex gap-6 items-center">
-                                        <div className="w-20 h-24 bg-[#faf9f6] flex-shrink-0 p-2 overflow-hidden border border-gray-50">
-                                            <img src={item.product?.images?.[0] || "/placeholder.png"} className="w-full h-full object-contain" alt="" />
+                                        <div className="w-20 h-24 bg-[#faf9f6] flex-shrink-0 p-2 overflow-hidden border border-gray-50 relative">
+                                            <Image src={item.product?.images?.[0] || "/placeholder.png"} fill className="w-full h-full object-contain p-2" alt={item.product?.name || "Product"} />
                                         </div>
                                         <div className="flex-1">
                                             <h4 className="text-sm font-bold text-gray-900 uppercase tracking-tight">{item.product?.name}</h4>

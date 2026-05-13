@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { X, ArrowRight, Loader2, Mail, Phone, ShieldCheck, CheckCircle2 } from "lucide-react";
+import Image from "next/image";
 import { customerApi } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
@@ -111,14 +112,11 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
             <div className="relative bg-white w-full max-w-[750px] h-[480px] overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.3)] animate-in fade-in zoom-in-95 duration-700 flex flex-col md:flex-row">
                 
-                {/* Left Side: Luxury Visual */}
                 <div className="hidden md:block relative w-[38%] bg-gray-900 overflow-hidden">
-                    <img 
+                    <Image 
                         src="/hero-2.png" 
                         alt="AKOD Luxury" 
-                        onError={(e) => {
-                            (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=1000";
-                        }}
+                        fill
                         className="absolute inset-0 w-full h-full object-cover opacity-80 scale-110 animate-pulse-slow"
                     />
                     <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />

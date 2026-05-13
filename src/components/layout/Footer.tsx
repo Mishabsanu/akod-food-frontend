@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 
 export default function Footer() {
@@ -10,11 +11,12 @@ export default function Footer() {
 
                     {/* Brand Identity */}
                     <div className="md:col-span-5 flex flex-col items-start space-y-12">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <div className="bg-white rounded-lg p-2 inline-block">
-                            <img
+                            <Image
                                 src="/logo.jpg"
                                 alt="AKOD"
+                                width={64}
+                                height={64}
                                 className="h-16 w-auto object-contain"
                             />
                         </div>

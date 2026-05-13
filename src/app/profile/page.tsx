@@ -4,6 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { customerApi } from "@/lib/api";
 import { ChevronRight, Loader2, LogOut, MapPin } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -396,7 +397,7 @@ export default function ProfilePage() {
                                                 {order.items?.map((item: any, idx: number) => (
                                                     <div key={idx} className="flex items-center gap-6">
                                                         <div className="w-16 h-20 bg-white border border-gray-200 flex-shrink-0 overflow-hidden relative p-1">
-                                                            <img src={item.product?.images?.[0] || "/placeholder.png"} alt={item.product?.name} className="w-full h-full object-contain mix-blend-multiply opacity-80" />
+                                                            <Image src={item.product?.images?.[0] || "/placeholder.png"} alt={item.product?.name || "Product"} fill className="w-full h-full object-contain mix-blend-multiply opacity-80 p-1" />
                                                         </div>
                                                         <div>
                                                             <p className="font-serif text-lg font-light text-gray-900 mb-1">{item.product?.name}</p>
@@ -447,7 +448,7 @@ export default function ProfilePage() {
 
                                     <div className="pt-8 border-t border-gray-100">
                                         <p className="text-[11px] text-gray-400 leading-relaxed italic">
-                                            "For your security, changing your primary contact information requires verification via a one-time security key sent to your new destination."
+                                            &quot;For your security, changing your primary contact information requires verification via a one-time security key sent to your new destination.&quot;
                                         </p>
                                     </div>
                                 </div>
