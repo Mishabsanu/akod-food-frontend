@@ -17,6 +17,11 @@ const nextConfig = {
         hostname: 'upload.wikimedia.org',
         pathname: '**',
       },
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        pathname: '**',
+      },
     ],
   },
 };
