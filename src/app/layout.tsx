@@ -1,11 +1,14 @@
 import UIProvider from "@/providers/UIProvider";
+import ReduxProvider from "@/providers/ReduxProvider";
 import { CartProvider } from "@/context/CartContext";
+import { AuthProvider } from "@/context/AuthContext";
 import TopBar from "@/components/layout/TopBar";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PromoModal from "@/components/ui/PromoModal";
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const montserrat = Montserrat({ subsets: ["latin"] });
@@ -27,17 +30,56 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={montserrat.className}>
-        <UIProvider>
-          <CartProvider>
-            <div className="flex flex-col min-h-screen text-brand-text bg-brand-bgLight selection:bg-brand-primary selection:text-white">
-              <TopBar />
-              <Navbar />
-              <main className="flex-1 w-full">{children}</main>
-              <Footer />
-              <PromoModal />
-            </div>
-          </CartProvider>
-        </UIProvider>
+        <ReduxProvider>
+          <UIProvider>
+            <AuthProvider>
+              <CartProvider>
+                <div className="flex flex-col min-h-screen text-brand-text bg-brand-bgLight selection:bg-brand-primary selection:text-white">
+                <Toaster 
+                  position="top-right" 
+                  expand={false}
+                  richColors={false}
+                  closeButton
+                  toastOptions={{
+                    style: {
+                      background: '#ffffff',
+                      color: '#1a1a1a',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '0px',
+                      padding: '16px 24px',
+                      fontSize: '11px',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.2em',
+                      fontFamily: 'serif',
+                      boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
+                    },
+                    success: {
+                      style: {
+                        borderLeft: '4px solid #10b981', // Emerald
+                      }
+                    },
+                    error: {
+                      style: {
+                        borderLeft: '4px solid #ef4444',
+                      }
+                    },
+                    info: {
+                      style: {
+                        borderLeft: '4px solid #3b82f6',
+                      }
+                    }
+                  }}
+                />
+                  <TopBar />
+                  <Navbar />
+                  <main className="flex-1 w-full">{children}</main>
+                  <Footer />
+                  <PromoModal />
+                </div>
+              </CartProvider>
+            </AuthProvider>
+          </UIProvider>
+        </ReduxProvider>
       </body>
     </html>
   );

@@ -1,18 +1,22 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { Product, ProductVariant } from "@/data/products";
-
-export interface CartItem {
-    cartId: string;
-    product: Product;
-    variant: ProductVariant;
-    quantity: number;
-}
+import React, { createContext, useContext, useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { 
+    addToCart as reduxAddToCart, 
+    removeFromCart as reduxRemoveFromCart, 
+    updateQuantity as reduxUpdateQuantity, 
+    clearCart as reduxClearCart,
+    fetchCartFromBackend,
+    syncCartToBackend,
+    CartItem
+} from "@/store/slices/cartSlice";
+import { toast } from "sonner";
+import { useAuth } from "./AuthContext";
 
 interface CartContextType {
     items: CartItem[];
-    addToCart: (product: Product, variant: ProductVariant, quantity: number) => void;
+    addToCart: (product: any, variant: any, quantity: number) => void;
     removeFromCart: (cartId: string) => void;
     updateQuantity: (cartId: string, quantity: number) => void;
     clearCart: () => void;
@@ -26,70 +30,67 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [items, setItems] = useState<CartItem[]>([]);
-    const [isMounted, setIsMounted] = useState(false);
+    const dispatch = useAppDispatch();
+    const { items, isSynced } = useAppSelector((state) => state.cart);
+    const { isAuthenticated, setAuthModalOpen } = useAuth();
 
     useEffect(() => {
-        setIsMounted(true);
-        const savedCart = localStorage.getItem("luxury_food_cart");
-        if (savedCart) {
-            try {
-                setItems(JSON.parse(savedCart));
-            } catch (e) {
-                console.error("Failed to parse cart from local storage", e);
-            }
+        if (isAuthenticated) {
+            dispatch(fetchCartFromBackend());
         }
-    }, []);
+    }, [isAuthenticated, dispatch]);
 
+    // Background sync effect
     useEffect(() => {
-        if (isMounted) {
-            localStorage.setItem("luxury_food_cart", JSON.stringify(items));
+        if (isAuthenticated && !isSynced) {
+            const timer = setTimeout(() => {
+                dispatch(syncCartToBackend(items));
+            }, 500);
+            return () => clearTimeout(timer);
         }
-    }, [items, isMounted]);
+    }, [items, isAuthenticated, isSynced, dispatch]);
 
-    const addToCart = (product: Product, variant: ProductVariant, quantity: number) => {
-        setItems((prevItems) => {
-            const existingItemIndex = prevItems.findIndex(
-                (item) => item.product.id === product.id && item.variant.weight === variant.weight
-            );
-
-            if (existingItemIndex >= 0) {
-                const newItems = [...prevItems];
-                newItems[existingItemIndex].quantity += quantity;
-                return newItems;
-            } else {
-                return [...prevItems, { cartId: `${product.id}-${variant.weight}`, product, variant, quantity }];
-            }
-        });
+    const addToCart = (product: any, variant: any, quantity: number) => {
+        if (!isAuthenticated) {
+            setAuthModalOpen(true, "IDENTITY");
+            toast.error("Please sign in to add items to your cart");
+            return;
+        }
+        dispatch(reduxAddToCart({ product, variant, quantity }));
+        toast.success("Item added to cart");
     };
 
     const removeFromCart = (cartId: string) => {
-        setItems((prevItems) => prevItems.filter((item) => item.cartId !== cartId));
+        dispatch(reduxRemoveFromCart(cartId));
+        toast.info("Item removed from cart");
     };
 
     const updateQuantity = (cartId: string, quantity: number) => {
-        if (quantity <= 0) {
-            removeFromCart(cartId);
-            return;
-        }
-        setItems((prevItems) =>
-            prevItems.map((item) => (item.cartId === cartId ? { ...item, quantity } : item))
-        );
+        dispatch(reduxUpdateQuantity({ cartId, quantity }));
     };
 
     const clearCart = () => {
-        setItems([]);
+        dispatch(reduxClearCart());
+        toast.info("Cart cleared");
     };
 
-    const cartSubtotal = items.reduce((total, item) => total + item.variant.price * item.quantity, 0);
+    const cartSubtotal = items.reduce((total, item) => {
+        const price = Number(item.variant?.sellingPrice || item.variant?.price || item.product?.price || 0);
+        return total + (price * item.quantity);
+    }, 0);
+
     const itemCount = items.reduce((total, item) => total + item.quantity, 0);
     
-    const platformFee = items.length > 0 ? 50 : 0;
-    const deliveryFee = items.length > 0 ? (cartSubtotal >= 2000 ? 0 : 150) : 0;
-    const cartTotal = cartSubtotal + platformFee + deliveryFee;
+    // User requested NO CHARGES
+    const platformFee = 0;
+    const deliveryFee = 0;
+    const cartTotal = cartSubtotal;
 
     return (
-        <CartContext.Provider value={{ items, addToCart, removeFromCart, updateQuantity, clearCart, cartTotal, itemCount, cartSubtotal, platformFee, deliveryFee }}>
+        <CartContext.Provider value={{ 
+            items, addToCart, removeFromCart, updateQuantity, clearCart, 
+            cartTotal, itemCount, cartSubtotal, platformFee, deliveryFee 
+        }}>
             {children}
         </CartContext.Provider>
     );

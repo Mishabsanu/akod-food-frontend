@@ -2,22 +2,32 @@
 
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
-import { ShoppingBag, User, Search, Menu } from "lucide-react";
+import { ShoppingBag, User, Search, Menu, ChevronDown } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 import { useState,useEffect  } from "react";
 import CartDrawer from "../ui/CartDrawer";
 import AuthModal from "../ui/AuthModal";
 
 export default function Navbar() {
+    const { user, isAuthenticated, isAuthModalOpen, setAuthModalOpen } = useAuth();
     const { itemCount } = useCart();
     const pathname = usePathname();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isCartOpen, setIsCartOpen] = useState(false);
-    const [isAuthOpen, setIsAuthOpen] = useState(false);
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [categories, setCategories] = useState<any[]>([]);
+    const [isCategoryOpen, setIsCategoryOpen] = useState(false);
 
     useEffect(() => {
-        setIsAuthenticated(localStorage.getItem("akodAuth") === "true");
+        const fetchCategories = async () => {
+            try {
+                const res = await customerApi.getCategories();
+                setCategories(res.data.data || []);
+            } catch (error) {
+                console.error("Categories fetch failed", error);
+            }
+        };
+        fetchCategories();
     }, []);
 
     const links = [
@@ -44,15 +54,62 @@ export default function Navbar() {
                             </div>
 
                             <div className="hidden md:flex items-center space-x-12">
-                                {links.map((link) => (
-                                    <Link
-                                        key={link.name}
-                                        href={link.path}
-                                        className={`text-[11px] uppercase tracking-[0.2em] font-medium transition-colors ${pathname === link.path ? "text-brand-primary" : "text-gray-800 hover:text-brand-primary"}`}
+                                <Link 
+                                    href="/" 
+                                    className={`text-[11px] uppercase tracking-[0.2em] font-medium transition-colors ${pathname === "/" ? "text-brand-primary" : "text-gray-800 hover:text-brand-primary"}`}
+                                >
+                                    Home
+                                </Link>
+                                
+                                <div 
+                                    className="relative group"
+                                    onMouseEnter={() => setIsCategoryOpen(true)}
+                                    onMouseLeave={() => setIsCategoryOpen(false)}
+                                >
+                                    <Link 
+                                        href="/products" 
+                                        className={`text-[11px] uppercase tracking-[0.2em] font-medium transition-colors flex items-center gap-1.5 ${pathname === "/products" ? "text-brand-primary" : "text-gray-800 hover:text-brand-primary"}`}
                                     >
-                                        {link.name}
+                                        Shop <ChevronDown className={`h-3 w-3 transition-transform duration-300 ${isCategoryOpen ? 'rotate-180' : ''}`} />
                                     </Link>
-                                ))}
+                                    
+                                    {/* Category Dropdown */}
+                                    <div className={`absolute top-full left-0 pt-6 transition-all duration-300 ${isCategoryOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'}`}>
+                                        <div className="bg-white border border-gray-100 shadow-2xl p-8 min-w-[280px] backdrop-blur-xl bg-white/95">
+                                            <div className="grid grid-cols-1 gap-6">
+                                                <div>
+                                                    <h3 className="text-[9px] uppercase tracking-[0.3em] text-gray-400 mb-4">Categories</h3>
+                                                    <div className="space-y-4">
+                                                        {categories.map((cat) => (
+                                                            <Link 
+                                                                key={cat._id} 
+                                                                href={`/products?category=${cat._id}`}
+                                                                className="block text-[12px] font-light tracking-wider text-gray-600 hover:text-black transition-colors"
+                                                                onClick={() => setIsCategoryOpen(false)}
+                                                            >
+                                                                {cat.name}
+                                                            </Link>
+                                                        ))}
+                                                        <Link 
+                                                            href="/products"
+                                                            className="block text-[10px] uppercase tracking-[0.2em] text-brand-primary pt-2 border-t border-gray-50"
+                                                            onClick={() => setIsCategoryOpen(false)}
+                                                        >
+                                                            View All Products
+                                                        </Link>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <Link 
+                                    href="/#story" 
+                                    className="text-[11px] uppercase tracking-[0.2em] font-medium text-gray-800 hover:text-brand-primary transition-colors"
+                                >
+                                    Story
+                                </Link>
                             </div>
                         </div>
 
@@ -88,11 +145,14 @@ export default function Navbar() {
                             </div>
 
                             {isAuthenticated ? (
-                                <Link href="/profile" className="text-gray-800 hover:text-gray-500 transition-colors">
+                                <Link href="/profile" className="flex items-center gap-2 text-gray-800 hover:text-brand-primary transition-colors group">
+                                    <span className="hidden sm:block text-[9px] uppercase tracking-[0.2em] font-medium text-gray-400 group-hover:text-black transition-colors">
+                                        Hi, {user?.name.split(' ')[0]}
+                                    </span>
                                     <User className="h-5 w-5" strokeWidth={1.25} />
                                 </Link>
                             ) : (
-                                <button onClick={() => setIsAuthOpen(true)} className="text-gray-800 hover:text-gray-500 transition-colors">
+                                <button onClick={() => setAuthModalOpen(true, "IDENTITY")} className="text-gray-800 hover:text-brand-primary transition-colors">
                                     <User className="h-5 w-5" strokeWidth={1.25} />
                                 </button>
                             )}
@@ -137,7 +197,7 @@ export default function Navbar() {
             <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
             
             {/* Auth Modal Component */}
-            <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
+            <AuthModal isOpen={isAuthModalOpen} onClose={() => setAuthModalOpen(false)} />
         </>
     );
 }

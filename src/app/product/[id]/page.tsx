@@ -1,37 +1,63 @@
 "use client";
 
-import { useState } from "react";
-import { products } from "@/data/products";
+import { useState, useEffect } from "react";
 import { useCart } from "@/context/CartContext";
-import { ArrowLeft, Minus, Plus } from "lucide-react";
+import { ArrowLeft, Minus, Plus, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import ProductCard from "@/components/ui/ProductCard";
 import StarRating from "@/components/ui/StarRating";
 import ReviewSection from "@/components/ui/ReviewSection";
+import { customerApi } from "@/lib/api";
 
 export default function ProductViewPage({ params }: { params: { id: string } }) {
-    const product = products.find((p) => p.id === params.id);
+    const [product, setProduct] = useState<any>(null);
+    const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
     const { addToCart } = useCart();
     const [selectedVariantIdx, setSelectedVariantIdx] = useState(0);
     const [quantity, setQuantity] = useState(1);
     const [isAdded, setIsAdded] = useState(false);
-    const defaultImage = product?.image || "";
-    const [activeImage, setActiveImage] = useState(defaultImage);
+    const [activeImage, setActiveImage] = useState("");
+
+    useEffect(() => {
+        const fetchProductData = async () => {
+            try {
+                const res = await customerApi.getProductById(params.id);
+                const prod = res.data.data;
+                setProduct(prod);
+                setActiveImage(prod.images?.[0] || "/placeholder.png");
+
+                // Fetch related products (using all products for now, filter by category)
+                const allRes = await customerApi.getProducts();
+                const allProds = allRes.data.data || [];
+                const catId = typeof prod.category === 'object' ? prod.category._id : prod.category;
+                const related = allProds
+                    .filter((p: any) => {
+                        const pCatId = typeof p.category === 'object' ? p.category._id : p.category;
+                        return pCatId === catId && p._id !== prod._id;
+                    })
+                    .slice(0, 3);
+                setRelatedProducts(related);
+            } catch (error) {
+                console.error("Failed to fetch product", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchProductData();
+    }, [params.id]);
+
+    if (loading) return (
+        <div className="min-h-screen flex items-center justify-center bg-[#faf9f6]">
+            <Loader2 className="w-12 h-12 text-black animate-spin" strokeWidth={1} />
+        </div>
+    );
 
     if (!product) return notFound();
 
-    const selectedVariant = product.variants[selectedVariantIdx];
-
-    const relatedProducts = products
-        .filter((p) => p.category === product.category && p.id !== product.id)
-        .slice(0, 3);
-
-    // If not enough in category, just grab random items to fill up to 3
-    if (relatedProducts.length < 3) {
-        const additional = products.filter(p => !relatedProducts.includes(p) && p.id !== product.id);
-        relatedProducts.push(...additional.slice(0, 3 - relatedProducts.length));
-    }
+    const selectedVariant = product.variants?.[selectedVariantIdx] || { sellingPrice: product.price, name: "Default", unit: "" };
+    const categoryName = typeof product.category === 'object' ? product.category.name : "Portfolio";
 
     const handleAdd = () => {
         addToCart(product, selectedVariant, quantity);
@@ -56,7 +82,7 @@ export default function ProductViewPage({ params }: { params: { id: string } }) 
                 <div className="flex flex-col lg:flex-row gap-6 w-full lg:col-span-1">
                     {/* Thumbnails (Left side on desktop, bottom on mobile) */}
                     <div className="flex lg:flex-col gap-4 order-2 lg:order-1 overflow-x-auto lg:overflow-hidden hide-scrollbar">
-                        {product.gallery?.map((img, idx) => (
+                        {product.images?.map((img: string, idx: number) => (
                             <button 
                                 key={idx}
                                 onClick={() => setActiveImage(img)}
@@ -77,7 +103,7 @@ export default function ProductViewPage({ params }: { params: { id: string } }) 
                             className="w-full h-full object-contain cursor-zoom-in transition-transform duration-700 ease-out group-hover:scale-[1.35]"
                         />
                         <div className="absolute top-8 left-8 text-[9px] uppercase tracking-[0.4em] text-gray-400 rotate-[-90deg] origin-top-left translate-y-12 z-10 hidden lg:block">
-                            {product.category}
+                            {categoryName}
                         </div>
                     </div>
                 </div>
@@ -86,7 +112,7 @@ export default function ProductViewPage({ params }: { params: { id: string } }) 
                     <div className="flex flex-col pt-8 lg:pt-16">
                         
                         <div className="mb-10">
-                            <h1 className="text-4xl md:text-5xl lg:text-[4rem] font-serif text-gray-900 font-light leading-none tracking-tight mb-6">
+                            <h1 className="text-4xl md:text-5xl lg:text-[4rem] font-serif text-gray-900 font-light leading-none tracking-tight mb-6 uppercase italic">
                                 {product.name}
                             </h1>
                             <p className="text-gray-500 font-light text-base leading-relaxed max-w-lg">
@@ -98,31 +124,33 @@ export default function ProductViewPage({ params }: { params: { id: string } }) 
                             <span className="text-[10px] uppercase tracking-[0.3em] text-gray-400 block mb-6">Valuation</span>
                             <div className="flex items-center justify-between">
                                 <div className="text-3xl font-serif text-gray-900 font-light">
-                                    ₹{selectedVariant.price}
+                                    ₹{selectedVariant.sellingPrice}
                                 </div>
-                                <StarRating rating={product.rating} count={product.reviewsCount} showText size={12} />
+                                <StarRating rating={product.rating || 5} count={product.reviewsCount || 0} showText size={12} />
                             </div>
                         </div>
 
                         {/* Variants */}
-                        <div className="border-t border-gray-200 py-8">
-                            <span className="text-[10px] uppercase tracking-[0.3em] text-gray-400 block mb-6">Curated Quantities</span>
-                            <div className="flex flex-wrap gap-4">
-                                {product.variants.map((variant, idx) => (
-                                    <button
-                                        key={variant.weight}
-                                        onClick={() => setSelectedVariantIdx(idx)}
-                                        className={`px-8 py-4 text-[10px] uppercase tracking-[0.2em] font-medium transition-colors border ${
-                                            selectedVariantIdx === idx
-                                                ? "border-black bg-black text-white"
-                                                : "border-gray-200 bg-white text-gray-500 hover:border-black hover:text-black"
-                                        }`}
-                                    >
-                                        {variant.weight}
-                                    </button>
-                                ))}
+                        {product.variants?.length > 0 && (
+                            <div className="border-t border-gray-200 py-8">
+                                <span className="text-[10px] uppercase tracking-[0.3em] text-gray-400 block mb-6">Curated Quantities</span>
+                                <div className="flex flex-wrap gap-4">
+                                    {product.variants.map((variant: any, idx: number) => (
+                                        <button
+                                            key={idx}
+                                            onClick={() => setSelectedVariantIdx(idx)}
+                                            className={`px-8 py-4 text-[10px] uppercase tracking-[0.2em] font-medium transition-colors border ${
+                                                selectedVariantIdx === idx
+                                                    ? "border-black bg-black text-white"
+                                                    : "border-gray-200 bg-white text-gray-500 hover:border-black hover:text-black"
+                                            }`}
+                                        >
+                                            {variant.name}{variant.unit}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
+                        )}
 
                         {/* Actions */}
                         <div className="border-t border-gray-200 py-8 flex flex-col sm:flex-row gap-6">
@@ -174,24 +202,24 @@ export default function ProductViewPage({ params }: { params: { id: string } }) 
 
                 {/* Review Section */}
                 <ReviewSection 
-                    productId={product.id} 
-                    initialRating={product.rating} 
-                    initialReviewsCount={product.reviewsCount} 
+                    productId={product._id} 
                 />
 
                 {/* Related Products Section */}
-                <div className="pt-20 border-t border-gray-100 pb-16">
-                    <div className="mb-12">
-                        <p className="text-[9px] uppercase tracking-[0.4em] text-gray-400 mb-2">Curated For You</p>
-                        <h2 className="text-3xl font-serif text-gray-900 font-light">Complementary Provisions.</h2>
+                {relatedProducts.length > 0 && (
+                    <div className="pt-20 border-t border-gray-100 pb-16">
+                        <div className="mb-12">
+                            <p className="text-[9px] uppercase tracking-[0.4em] text-gray-400 mb-2">Curated For You</p>
+                            <h2 className="text-3xl font-serif text-gray-900 font-light">Complementary Provisions.</h2>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 gap-y-16">
+                            {relatedProducts.map((p) => (
+                                <ProductCard key={p._id} product={p} />
+                            ))}
+                        </div>
                     </div>
-                    
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 gap-y-16">
-                        {relatedProducts.map((p) => (
-                            <ProductCard key={p.id} product={p} />
-                        ))}
-                    </div>
-                </div>
+                )}
 
             </div>
         </div>

@@ -1,11 +1,18 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { products } from "@/data/products";
+import { useState, useMemo, useEffect } from "react";
 import ProductCard from "@/components/ui/ProductCard";
-import { SlidersHorizontal, ChevronDown, Check, X } from "lucide-react";
-
+import { SlidersHorizontal, ChevronDown, Check, X, Loader2 } from "lucide-react";
+import { customerApi } from "@/lib/api";
+import { useSearchParams } from "next/navigation";
 export default function ShopPage() {
+    const searchParams = useSearchParams();
+    const categoryParam = searchParams.get("category");
+
+    const [allProducts, setAllProducts] = useState<any[]>([]);
+    const [categories, setCategories] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [selectedFlavors, setSelectedFlavors] = useState<string[]>([]);
     const [selectedWeights, setSelectedWeights] = useState<string[]>([]);
@@ -14,12 +21,37 @@ export default function ShopPage() {
     const [sortOption, setSortOption] = useState<string>("featured");
     const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
-    const categories = Array.from(new Set(products.map((p) => p.category)));
+    useEffect(() => {
+        if (categoryParam) {
+            setSelectedCategories([categoryParam]);
+        } else {
+            setSelectedCategories([]);
+        }
+    }, [categoryParam]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [prodRes, catRes] = await Promise.all([
+                    customerApi.getProducts(),
+                    customerApi.getCategories()
+                ]);
+                setAllProducts(prodRes.data.data || []);
+                setCategories(catRes.data.data || []);
+            } catch (error) {
+                console.error("Fetch failed", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchData();
+    }, []);
+
     const flavors = ["Classic", "Spicy", "Sweet"];
     const weights = ["50g", "100g", "250g", "500g", "1kg"];
 
-    const toggleCategory = (cat: string) => {
-        setSelectedCategories(prev => prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]);
+    const toggleCategory = (catId: string) => {
+        setSelectedCategories(prev => prev.includes(catId) ? prev.filter(c => c !== catId) : [...prev, catId]);
     };
 
     const toggleFlavor = (flavor: string) => {
@@ -39,14 +71,19 @@ export default function ShopPage() {
     };
 
     const filteredAndSortedProducts = useMemo(() => {
-        let result = products.filter(product => {
-            if (selectedCategories.length > 0 && !selectedCategories.includes(product.category)) return false;
+        let result = allProducts.filter(product => {
+            // Category Filter
+            if (selectedCategories.length > 0) {
+                const prodCatId = typeof product.category === 'object' ? product.category._id : product.category;
+                if (!selectedCategories.includes(prodCatId)) return false;
+            }
 
+            // Flavor Filter (Simulated based on name)
             if (selectedFlavors.length > 0) {
                 const nameLower = product.name.toLowerCase();
                 const isSpicy = nameLower.includes("spicy");
                 const isSweet = nameLower.includes("sweet");
-                const isClassic = nameLower.includes("normal") || nameLower.includes("classic");
+                const isClassic = !isSpicy && !isSweet;
 
                 let flavorMatch = false;
                 if (selectedFlavors.includes("Spicy") && isSpicy) flavorMatch = true;
@@ -56,39 +93,51 @@ export default function ShopPage() {
                 if (!flavorMatch) return false;
             }
 
+            // Weight Filter
             if (selectedWeights.length > 0) {
-                const hasMatch = product.variants.some(v => selectedWeights.includes(v.weight));
+                const hasMatch = product.variants?.some((v: any) => selectedWeights.includes(`${v.name}${v.unit}`));
                 if (!hasMatch) return false;
             }
 
-            const basePrice = Math.min(...product.variants.map(v => v.price));
+            // Price Filter
+            const basePrice = product.variants?.length > 0 
+                ? Math.min(...product.variants.map((v: any) => v.sellingPrice || 0))
+                : product.price;
+            
             if (minPrice && basePrice < Number(minPrice)) return false;
             if (maxPrice && basePrice > Number(maxPrice)) return false;
 
             return true;
         });
 
+        // Sorting
         result.sort((a, b) => {
-            const priceA = Math.min(...a.variants.map(v => v.price));
-            const priceB = Math.min(...b.variants.map(v => v.price));
+            const priceA = a.variants?.length > 0 ? Math.min(...a.variants.map((v: any) => v.sellingPrice || 0)) : a.price;
+            const priceB = b.variants?.length > 0 ? Math.min(...b.variants.map((v: any) => v.sellingPrice || 0)) : b.price;
             if (sortOption === "price-asc") return priceA - priceB;
             if (sortOption === "price-desc") return priceB - priceA;
             return 0;
         });
 
         return result;
-    }, [selectedCategories, selectedFlavors, selectedWeights, minPrice, maxPrice, sortOption]);
+    }, [allProducts, selectedCategories, selectedFlavors, selectedWeights, minPrice, maxPrice, sortOption]);
+
+    if (loading) return (
+        <div className="min-h-screen flex items-center justify-center bg-[#faf9f6]">
+            <Loader2 className="w-12 h-12 text-black animate-spin" strokeWidth={1} />
+        </div>
+    );
 
     return (
         <div className="bg-[#faf9f6] min-h-screen  pb-32 font-sans selection:bg-brand-primary/20 selection:text-black">
             
             <div className="w-full bg-white border-b border-gray-100 py-10 lg:py-12 mb-8 lg:mb-12">
                 <div className="max-w-[1400px] mx-auto px-6 sm:px-12">
-                    <p className="text-[9px] uppercase tracking-[0.4em] mb-3 lg:mb-4 font-medium text-gray-400">
-                        The Complete Portfolio
+                    <p className="text-[9px] uppercase tracking-[0.4em] mb-2 font-medium text-gray-400">
+                        Our Collection
                     </p>
-                    <h1 className="text-4xl md:text-6xl lg:text-[5rem] font-serif text-gray-900 font-light leading-none tracking-tight">
-                        Atelier.
+                    <h1 className="text-2xl md:text-3xl lg:text-4xl font-serif text-gray-900 font-light leading-none tracking-tight">
+                        Our Shop.
                     </h1>
                 </div>
             </div>
@@ -131,15 +180,15 @@ export default function ShopPage() {
                             </div>
 
                             <div className="mb-12">
-                                <h3 className="text-[10px] uppercase tracking-[0.2em] text-gray-400 mb-5">Ingredient</h3>
+                                <h3 className="text-[10px] uppercase tracking-[0.2em] text-gray-400 mb-5">Category</h3>
                                 <ul className="space-y-4">
                                     {categories.map(cat => (
-                                        <li key={cat}>
-                                            <button onClick={() => toggleCategory(cat)} className="flex items-start gap-4 group w-full text-left">
-                                                <div className={`flex-shrink-0 w-3.5 h-3.5 mt-0.5 flex items-center justify-center transition-colors ${selectedCategories.includes(cat) ? "bg-black border-black" : "border border-gray-300 group-hover:border-black"}`}>
-                                                    {selectedCategories.includes(cat) && <Check className="h-2.5 w-2.5 text-white" strokeWidth={3} />}
+                                        <li key={cat._id}>
+                                            <button onClick={() => toggleCategory(cat._id)} className="flex items-start gap-4 group w-full text-left">
+                                                <div className={`flex-shrink-0 w-3.5 h-3.5 mt-0.5 flex items-center justify-center transition-colors ${selectedCategories.includes(cat._id) ? "bg-black border-black" : "border border-gray-300 group-hover:border-black"}`}>
+                                                    {selectedCategories.includes(cat._id) && <Check className="h-2.5 w-2.5 text-white" strokeWidth={3} />}
                                                 </div>
-                                                <span className={`text-[13px] font-light tracking-wide transition-colors ${selectedCategories.includes(cat) ? "text-black" : "text-gray-500 group-hover:text-black"}`}>{cat}</span>
+                                                <span className={`text-[13px] font-light tracking-wide transition-colors ${selectedCategories.includes(cat._id) ? "text-black" : "text-gray-500 group-hover:text-black"}`}>{cat.name}</span>
                                             </button>
                                         </li>
                                     ))}
@@ -147,7 +196,7 @@ export default function ShopPage() {
                             </div>
 
                             <div className="mb-12">
-                                <h3 className="text-[10px] uppercase tracking-[0.2em] text-gray-400 mb-5">Profile</h3>
+                                <h3 className="text-[10px] uppercase tracking-[0.2em] text-gray-400 mb-5">Flavor</h3>
                                 <ul className="space-y-4">
                                     {flavors.map(flavor => (
                                         <li key={flavor}>
@@ -233,14 +282,14 @@ export default function ShopPage() {
                         {filteredAndSortedProducts.length > 0 ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16">
                                 {filteredAndSortedProducts.map((product) => (
-                                    <ProductCard key={product.id} product={product} />
+                                    <ProductCard key={product._id} product={product} />
                                 ))}
                             </div>
                         ) : (
                             <div className="text-center py-32 px-6 flex flex-col items-center justify-center bg-white border border-gray-100">
                                 <X className="h-8 w-8 text-gray-300 mb-6" />
-                                <h3 className="text-2xl font-serif text-gray-900 mb-3 font-light">No Options Confirmed.</h3>
-                                <p className="text-sm text-gray-500 font-light mb-8 max-w-sm mx-auto">We couldn&apos;t find any pieces matching your exact parameter specifications. Try reducing active filters.</p>
+                                <h3 className="text-2xl font-serif text-gray-900 mb-3 font-light">No Products Found.</h3>
+                                <p className="text-sm text-gray-500 font-light mb-8 max-w-sm mx-auto">We couldn&apos;t find any products matching your selected filters. Try changing your search.</p>
                                 <button 
                                     onClick={clearAll}
                                     className="border border-black px-8 py-4 text-[10px] uppercase tracking-widest text-black hover:bg-black hover:text-white transition-colors duration-500"

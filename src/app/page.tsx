@@ -7,8 +7,30 @@ import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
+import { customerApi } from "@/lib/api";
+
 export default function Home() {
-  const curatedProducts = products.slice(0, 4);
+  const [allProducts, setAllProducts] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [prodRes, catRes] = await Promise.all([
+          customerApi.getProducts({ limit: 4 }),
+          customerApi.getCategories()
+        ]);
+        setAllProducts(prodRes.data.data || []);
+        setCategories(catRes.data.data || []);
+      } catch (error) {
+        console.error("Fetch failed", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   const fadeUp: any = {
     initial: { opacity: 0, y: 30 },
@@ -27,27 +49,27 @@ export default function Home() {
   const slides = [
     {
       id: 1,
-      tag: "The Heritage Collection",
-      title: "A Symphony <br /> of Crunch.",
-      desc: "Elevating South Indian snacking to an art form. Discover our meticulously crafted chips, born from pristine ingredients and generations of mastery.",
+      tag: "Freshly Made",
+      title: "Perfectly <br /> Crunchy Chips.",
+      desc: "Authentic South Indian snacks made with fresh ingredients and traditional methods. Taste the difference of handmade quality.",
       img: "/hero-1.png",
-      linkText: "Explore The Atelier"
+      linkText: "Shop All Products"
     },
     {
       id: 2,
-      tag: "Wood-Fired Mastery",
-      title: "Alchemists <br /> of Flavor.",
-      desc: "Experience Jackfruit like never before. Hand-selected from the lush estates of Kerala and tossed in custom-blended spices.",
+      tag: "Traditional Taste",
+      title: "Real <br /> Natural Flavor.",
+      desc: "Our snacks are made using the best bananas and spices from Kerala. No artificial colors or flavors, just pure taste.",
       img: "/hero-2.png",
-      linkText: "Acquire Jackfruit"
+      linkText: "Explore Flavors"
     },
     {
       id: 3,
-      tag: "The Authentic Process",
-      title: "Elegance in <br /> Every Bag.",
-      desc: "We refuse to automate the soul out of our process. Every batch is a small-batch, artisanal undertaking crafted for the sophisticated palate.",
+      tag: "Small Batch Quality",
+      title: "Handmade <br /> with Care.",
+      desc: "Every bag is packed with snacks made in small batches to ensure you get the freshest quality every time.",
       img: "/hero-3.png",
-      linkText: "View Collection"
+      linkText: "View Shop"
     }
   ];
 
@@ -153,16 +175,16 @@ export default function Home() {
         >
           <div className="md:w-1/3">
             <h2 className="text-3xl lg:text-5xl font-serif text-gray-900 font-light mb-6">
-              The Artisan <br /> Narrative.
+              Our <br /> Story.
             </h2>
             <div className="w-8 h-[1px] bg-brand-primary mb-6"></div>
           </div>
           <div className="md:w-2/3 grid grid-cols-1 md:grid-cols-2 gap-8">
             <p className="text-sm font-light text-gray-600 leading-loose">
-              We believe that true luxury lies in the details. Every slice of our Nendran banana and Tapioca root is a testament to our uncompromising pursuit of perfection. By harmonizing ancestral recipes with contemporary refinement, we create a sensory experience that transcends ordinary snacking.
+              We believe that quality snacks should be made with care. Every slice of our banana and tapioca chips is made using the best ingredients. We use traditional recipes to give you the real taste of South India.
             </p>
             <p className="text-sm font-light text-gray-600 leading-loose">
-              Our craft is a labor of love, demanding patience, precision, and an intimate understanding of raw materials. We don&apos;t just fry chips; we curate moments of pure, unadulterated indulgence for the sophisticated palate.
+              Our snacks are made by hand, with patience and skill. We don&apos;t just make chips; we make sure every bag is filled with the freshest, most delicious snacks for you to enjoy.
             </p>
           </div>
         </motion.div>
@@ -173,9 +195,9 @@ export default function Home() {
         <div className="max-w-[1400px] mx-auto px-6 sm:px-12">
           <div className="flex flex-col md:flex-row justify-between items-end mb-20">
             <motion.div {...fadeUp} className="max-w-md">
-              <h2 className="text-3xl lg:text-4xl font-serif text-gray-900 mb-4 font-light">The Collection</h2>
+              <h2 className="text-3xl lg:text-4xl font-serif text-gray-900 mb-4 font-light">Our Collection</h2>
               <p className="text-sm font-light text-gray-500 leading-relaxed">
-                Our signature offerings, meticulously prepared using traditional kettle-cooked methods to preserve absolute flavor integrity.
+                Check out our best-selling snacks, made using traditional methods to keep the real flavor.
               </p>
             </motion.div>
             <motion.div {...fadeUp} className="hidden md:block pb-2">
@@ -191,10 +213,10 @@ export default function Home() {
             whileInView="whileInView"
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8"
           >
-            {curatedProducts.map((product, index) => (
+            {allProducts.map((product, index) => (
               <motion.div
                 variants={fadeUp}
-                key={product.id}
+                key={product._id}
                 className={index % 2 === 0 ? "md:-translate-y-8" : "md:translate-y-8"}
               >
                 <ProductCard product={product} />
@@ -215,12 +237,12 @@ export default function Home() {
         <div className="max-w-[1400px] mx-auto px-6 sm:px-12">
           <div className="flex flex-col lg:flex-row justify-between items-start mb-24 gap-12">
             <motion.div {...fadeUp} className="max-w-xl">
-              <p className="text-[10px] uppercase tracking-[0.4em] mb-6 font-medium text-brand-primary">Methodology</p>
-              <h2 className="text-4xl md:text-6xl lg:text-7xl font-serif font-light text-gray-900 leading-tight">The Artisanal <br /> Process.</h2>
+              <p className="text-[10px] uppercase tracking-[0.4em] mb-6 font-medium text-brand-primary">Our Method</p>
+              <h2 className="text-4xl md:text-6xl lg:text-7xl font-serif font-light text-gray-900 leading-tight">How We <br /> Make It.</h2>
             </motion.div>
             <motion.div {...fadeUp} className="max-w-md lg:mt-12">
               <p className="text-sm font-light text-gray-500 leading-relaxed">
-                We refuse to automate the soul out of our food. Our process is a meticulous human endeavor, combining generational wisdom with the finest raw materials available in Kerala.
+                We make our snacks by hand to keep the authentic taste. We use old-style cooking and the best ingredients from Kerala.
               </p>
             </motion.div>
           </div>
@@ -255,8 +277,42 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Categories / Editorials - Enhanced Sourcing */}
-      <section className="py-24 md:py-32 bg-white">
+      {/* Categories Showcase */}
+      <section className="py-24 bg-white border-t border-gray-100">
+        <div className="max-w-[1400px] mx-auto px-6 sm:px-12">
+          <motion.div {...fadeUp} className="text-center mb-16">
+            <p className="text-[10px] uppercase tracking-[0.4em] mb-4 font-medium text-brand-primary">Our Range</p>
+            <h2 className="text-4xl font-serif font-light text-gray-900">Shop by Category</h2>
+          </motion.div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {categories.map((cat, idx) => (
+              <motion.div
+                key={cat._id}
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: idx * 0.1 }}
+                viewport={{ once: true }}
+              >
+                <Link href={`/products?category=${cat._id}`} className="group block relative aspect-square overflow-hidden bg-gray-50 rounded-lg">
+                  <img 
+                    src={cat.image || "/placeholder.png"} 
+                    alt={cat.name} 
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-500"></div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <h3 className="text-white text-xl md:text-2xl font-serif font-light tracking-wide">{cat.name}</h3>
+                  </div>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Sourcing Section */}
+      <section className="py-24 md:py-32 bg-[#faf9f6]">
         <div className="max-w-[1400px] mx-auto px-6 sm:px-12">
           <motion.div
             variants={stagger}
@@ -264,21 +320,20 @@ export default function Home() {
             whileInView="whileInView"
             className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center"
           >
-            <motion.div variants={fadeUp} className="relative h-[500px] md:h-[700px] bg-[#faf9f6] w-full overflow-hidden">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/4.jpeg" alt="Spices" className="absolute inset-0 w-full h-full object-cover hover:scale-110 transition-transform duration-[3s] ease-out" />
+            <motion.div variants={fadeUp} className="relative h-[500px] md:h-[700px] bg-white w-full overflow-hidden rounded-xl shadow-2xl">
+              <img src="/4.jpeg" alt="Natural Ingredients" className="absolute inset-0 w-full h-full object-cover hover:scale-110 transition-transform duration-[3s] ease-out" />
             </motion.div>
             <motion.div variants={fadeUp} className="flex flex-col justify-center max-w-lg lg:ml-10">
-              <span className="text-[10px] uppercase tracking-[0.2em] font-light text-gray-400 mb-6 block">The AKOD Difference</span>
-              <h2 className="text-4xl lg:text-5xl font-serif text-gray-900 mb-8 font-light leading-snug">Purity & Fire</h2>
+              <span className="text-[10px] uppercase tracking-[0.2em] font-light text-gray-400 mb-6 block">Why Choose AKOD</span>
+              <h2 className="text-4xl lg:text-5xl font-serif text-gray-900 mb-8 font-light leading-snug">Natural & Pure</h2>
               <p className="text-sm text-gray-500 font-light leading-loose mb-6">
-                What makes AKOD extraordinary is our refusal to compromise. While the industry moves towards high-speed, automated production lines, we have deliberately stepped back in time.
+                What makes AKOD special is that we don&apos;t use shortcuts. While others use machines, we stick to traditional cooking.
               </p>
               <p className="text-sm text-gray-500 font-light leading-loose mb-12">
-                We traverse the lush estates of Kerala to hand-select the purest variants. But the true secret lies in our mastery of the elements. Using pure, unrefined coconut oil heated precisely over wood-fired brass kettles, we achieve a texture and aroma that is impossible to replicate mechanically. It is an alchemy of nature, fire, and human touch.
+                We travel across Kerala to find the best bananas. We use pure coconut oil and cook in small batches over wood fires. This is how we get the real taste and crunch that you love. It&apos;s all about keeping it natural and handmade.
               </p>
               <Link href="/products" className="group flex items-center gap-4 self-start">
-                <span className="text-[10px] uppercase tracking-[0.2em] font-light text-black">Shop Origins</span>
+                <span className="text-[10px] uppercase tracking-[0.2em] font-light text-black">Shop Now</span>
                 <div className="w-8 h-[1px] bg-black group-hover:w-16 transition-all duration-500"></div>
               </Link>
             </motion.div>
@@ -286,11 +341,11 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Minimal Footer Pre-section */}
+      {/* Newsletter Section */}
       <section className="py-32 bg-[#faf9f6] flex flex-col items-center justify-center text-center px-6">
         <motion.div {...fadeUp} className="max-w-xl">
-          <h2 className="text-2xl font-serif text-gray-900 mb-4 font-light">Join the Atelier</h2>
-          <p className="text-sm text-gray-500 font-light mb-10">Receive early access to seasonal collections and exclusive curations.</p>
+          <h2 className="text-2xl font-serif text-gray-900 mb-4 font-light">Stay Connected</h2>
+          <p className="text-sm text-gray-500 font-light mb-10">Sign up for our newsletter to get updates on new products and special offers.</p>
           <div className="flex w-full items-center border-b border-gray-300 focus-within:border-black transition-colors px-2 pb-2">
             <input
               type="email"

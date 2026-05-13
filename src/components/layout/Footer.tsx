@@ -19,12 +19,12 @@ export default function Footer() {
                             />
                         </div>
                         <p className="text-[10px] uppercase tracking-[0.2em] font-light leading-relaxed text-gray-400 max-w-sm">
-                            Curating extraordinary snacking experiences through the absolute finest ingredients. The definitive destination for luxury provender.
+                            Providing quality snacking experiences with the finest ingredients. Your destination for premium snacks.
                         </p>
 
                         {/* Newsletter Mini-form */}
                         <div className="w-full max-w-sm pt-4">
-                            <label className="block text-[9px] uppercase tracking-[0.3em] text-gray-500 mb-4">Join the Atelier</label>
+                            <label className="block text-[9px] uppercase tracking-[0.3em] text-gray-500 mb-4">Subscribe to our newsletter</label>
                             <div className="flex border-b border-gray-800 focus-within:border-white transition-colors pb-2">
                                 <input
                                     type="email"
@@ -43,9 +43,9 @@ export default function Footer() {
 
                         <div className="flex flex-col space-y-6">
                             <h3 className="text-[9px] uppercase tracking-[0.4em] font-medium text-gray-600 mb-2">Explore</h3>
-                            <Link href="/" className="text-xs font-light text-gray-400 hover:text-white transition-colors">The Homepage</Link>
-                            <Link href="/products" className="text-xs font-light text-gray-400 hover:text-white transition-colors">Complete Portfolio</Link>
-                            <Link href="/profile" className="text-xs font-light text-gray-400 hover:text-white transition-colors">Client Dossier</Link>
+                            <Link href="/" className="text-xs font-light text-gray-400 hover:text-white transition-colors">Home</Link>
+                            <Link href="/products" className="text-xs font-light text-gray-400 hover:text-white transition-colors">All Products</Link>
+                            <Link href="/profile" className="text-xs font-light text-gray-400 hover:text-white transition-colors">My Profile</Link>
                         </div>
 
                         <div className="flex flex-col space-y-6">
@@ -56,8 +56,8 @@ export default function Footer() {
                         </div>
 
                         <div className="flex flex-col space-y-6">
-                            <h3 className="text-[9px] uppercase tracking-[0.4em] font-medium text-gray-600 mb-2">Concierge</h3>
-                            <p className="text-xs font-light text-gray-400 hover:text-white transition-colors cursor-pointer">concierge@akodfood.com</p>
+                            <h3 className="text-[9px] uppercase tracking-[0.4em] font-medium text-gray-600 mb-2">Contact Us</h3>
+                            <p className="text-xs font-light text-gray-400 hover:text-white transition-colors cursor-pointer">support@akodfood.com</p>
                             <p className="text-xs font-light text-gray-400 hover:text-white transition-colors cursor-pointer">+91 90000 00000</p>
                             <p className="text-xs font-light text-gray-400 max-w-[150px] leading-relaxed pt-2">
                                 Available Mon-Fri, <br /> 09:00 - 18:00 IST
