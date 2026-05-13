@@ -8,6 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useState,useEffect  } from "react";
 import CartDrawer from "../ui/CartDrawer";
 import AuthModal from "../ui/AuthModal";
+import { customerApi } from "@/lib/api";
 
 export default function Navbar() {
     const { user, isAuthenticated, isAuthModalOpen, setAuthModalOpen } = useAuth();

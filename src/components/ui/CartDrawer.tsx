@@ -120,7 +120,7 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClo
                                                         {item.quantity}
                                                     </span>
                                                     <button 
-                                                        onClick={() => updateQuantity(item.cartId, quantity + 1)}
+                                                        onClick={() => updateQuantity(item.cartId, item.quantity + 1)}
                                                         className="px-3 py-2 text-gray-400 hover:text-black hover:bg-gray-50 transition-colors"
                                                     >
                                                         <Plus className="h-3 w-3" strokeWidth={1} />

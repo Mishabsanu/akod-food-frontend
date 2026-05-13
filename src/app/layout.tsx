@@ -53,21 +53,6 @@ export default function RootLayout({
                       fontFamily: 'serif',
                       boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
                     },
-                    success: {
-                      style: {
-                        borderLeft: '4px solid #10b981', // Emerald
-                      }
-                    },
-                    error: {
-                      style: {
-                        borderLeft: '4px solid #ef4444',
-                      }
-                    },
-                    info: {
-                      style: {
-                        borderLeft: '4px solid #3b82f6',
-                      }
-                    }
                   }}
                 />
                   <TopBar />
