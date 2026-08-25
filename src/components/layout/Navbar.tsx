@@ -35,7 +35,7 @@ export default function Navbar() {
     const links = [
         { name: "Home", path: "/" },
         { name: "Collection", path: "/products" },
-        { name: "Atelier", path: "/#story" },
+        { name: "Our Story", path: "/story" },
     ];
 
     return (

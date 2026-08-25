@@ -14,12 +14,53 @@ import "./globals.css";
 const montserrat = Montserrat({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title:
-    "AKOD FOOD | The Premium Heritage Collection",
+  metadataBase: new URL(process.env.FRONTEND_URL || "https://akodfood.com"),
+  title: {
+    default: "AKOD FOOD | Artisanal Kerala Heritage Provisions & Chips",
+    template: "%s | AKOD FOOD",
+  },
   description:
-    "Elevating South Indian snacking to an art form. Discover our meticulously crafted chips, born from pristine ingredients and generations of mastery.",
-  keywords:
-    "AKOD FOOD, Premium Chips, Banana Chips, Jackfruit Chips, Tapioca Chips, Luxury Snacking, Kerala Shacks",
+    "Handcrafted Kerala Nendran banana chips, jackfruit crisps, and traditional provisions prepared in 100% pure cold-pressed coconut oil over wood-fire brass kettles.",
+  keywords: [
+    "AKOD FOOD",
+    "Kerala Banana Chips",
+    "Cold Pressed Coconut Oil Chips",
+    "Jackfruit Chips",
+    "Tapioca Chips",
+    "Artisanal Kerala Snacks",
+    "Traditional Woodfire Cooking",
+    "Premium Indian Provisions"
+  ],
+  authors: [{ name: "AKOD Foods" }],
+  creator: "AKOD Foods",
+  openGraph: {
+    type: "website",
+    locale: "en_IN",
+    url: "https://akodfood.com",
+    siteName: "AKOD FOODS",
+    title: "AKOD FOOD | Artisanal Kerala Heritage Provisions & Chips",
+    description:
+      "Handcrafted Kerala snacks prepared in 100% pure cold-pressed coconut oil over wood-fire brass kettles.",
+    images: [
+      {
+        url: "/logo.jpg",
+        width: 800,
+        height: 800,
+        alt: "AKOD Foods Heritage Collection",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "AKOD FOOD | Artisanal Kerala Heritage Provisions",
+    description:
+      "Handcrafted Kerala snacks prepared in 100% pure cold-pressed coconut oil over wood-fire brass kettles.",
+    images: ["/logo.jpg"],
+  },
+  icons: {
+    icon: "/icon.jpg",
+    apple: "/icon.jpg",
+  },
 };
 
 export default function RootLayout({

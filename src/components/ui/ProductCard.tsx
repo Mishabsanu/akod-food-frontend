@@ -1,6 +1,6 @@
-"use client"
+"use client";
+
 import React, { useState } from "react";
-import { Product } from "@/data/products";
 import { useCart } from "@/context/CartContext";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -36,7 +36,7 @@ export default function ProductCard({ product }: { product: any }) {
             {/* Image Container */}
             <div className="relative h-[380px] w-full overflow-hidden bg-[#faf9f6] flex items-center justify-center p-8">
                 <Image
-                    src={product.images?.[0] || "/placeholder.png"}
+                    src={product.images?.[0] || product.image || "/placeholder.png"}
                     alt={product.name}
                     fill
                     className="max-h-full max-w-full object-contain transition-transform duration-1000 ease-in-out group-hover:scale-105 p-8"
@@ -69,7 +69,7 @@ export default function ProductCard({ product }: { product: any }) {
                 
                 <div className="flex items-center justify-center space-x-4">
                     <span className="text-sm font-light text-gray-900">
-                        ₹{selectedVariant.sellingPrice}
+                        ₹{selectedVariant.sellingPrice || selectedVariant.price || product.price}
                     </span>
                     {product.variants?.length > 0 && (
                         <>
@@ -85,7 +85,7 @@ export default function ProductCard({ product }: { product: any }) {
                             >
                                 {product.variants.map((v: any, idx: number) => (
                                     <option key={idx} value={idx}>
-                                        {v.name}{v.unit}
+                                        {v.name || v.weight}{v.unit || ''}
                                     </option>
                                 ))}
                             </select>
