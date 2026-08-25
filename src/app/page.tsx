@@ -125,36 +125,8 @@ export default function Home() {
     return fallbacks[index % fallbacks.length];
   };
 
-  // Ensure all 4 grid columns are always filled: active DB categories first, followed by Coming Soon previews
-  const displayCategories = (() => {
-    if (!categories || categories.length === 0) return fallbackCategories;
-    
-    // Map active backend categories
-    const activeCats = categories.map(c => ({
-      ...c,
-      isComingSoon: false
-    }));
-
-    if (activeCats.length >= 4) return activeCats;
-    
-    // Fill remaining slots with upcoming preview categories
-    const combined = [...activeCats];
-    for (const fb of fallbackCategories) {
-      if (combined.length >= 4) break;
-      const alreadyHas = combined.some(c => 
-        c._id === fb._id || 
-        (c.name && fb.name && c.name.toLowerCase().includes(fb.name.toLowerCase().split(' ')[0]))
-      );
-      if (!alreadyHas) {
-        combined.push({ ...fb, isComingSoon: true });
-      }
-    }
-    while (combined.length < 4) {
-      const fb = fallbackCategories[combined.length % fallbackCategories.length];
-      combined.push({ ...fb, _id: `${fb._id}-${combined.length}`, isComingSoon: true });
-    }
-    return combined;
-  })();
+  // Display real available categories
+  const displayCategories = (categories && categories.length > 0) ? categories : fallbackCategories;
 
   return (
     <div className="flex flex-col w-full bg-[#faf9f6] selection:bg-brand-primary/20 selection:text-black min-h-screen">
@@ -244,7 +216,7 @@ export default function Home() {
       <section id="story" className="py-24 md:py-36 bg-[#faf9f6] border-y border-stone-200/80">
         <div className="max-w-[1400px] mx-auto px-6 sm:px-12">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center">
-            
+
             {/* Left Narrative Column */}
             <motion.div {...fadeUp} className="lg:col-span-6 space-y-8">
               <div>
@@ -457,10 +429,7 @@ export default function Home() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
             {displayCategories.map((cat: any, idx: number) => {
               const catImage = getCategoryImage(cat, idx);
-              const isComingSoon = Boolean(cat.isComingSoon);
-              const targetUrl = isComingSoon
-                ? "/story"
-                : cat._id && typeof cat._id === "string" && cat._id.length === 24
+              const targetUrl = cat._id && typeof cat._id === "string" && cat._id.length === 24
                 ? `/products?category=${cat._id}`
                 : `/products?category=${encodeURIComponent(cat.name || cat._id)}`;
 
@@ -475,9 +444,7 @@ export default function Home() {
                 >
                   <Link
                     href={targetUrl}
-                    className={`group flex flex-col h-full bg-white p-4 sm:p-5 border transition-all duration-500 relative ${
-                      isComingSoon ? "border-gray-200 hover:border-gray-400" : "border-gray-200/80 hover:border-black shadow-sm"
-                    }`}
+                    className="group flex flex-col h-full bg-white p-4 sm:p-5 border border-gray-200/80 hover:border-black shadow-sm transition-all duration-500 relative"
                   >
                     {/* Dedicated Square Image Showcase Stage */}
                     <div className="relative aspect-square w-full bg-[#faf9f6] flex items-center justify-center p-6 mb-5 overflow-hidden">
@@ -486,22 +453,8 @@ export default function Home() {
                         alt={cat.name}
                         fill
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                        className={`object-contain w-full h-full p-2 transition-transform duration-700 ease-out group-hover:scale-105 ${
-                          isComingSoon ? "opacity-90" : "opacity-100"
-                        }`}
+                        className="object-contain w-full h-full p-2 transition-transform duration-700 ease-out group-hover:scale-105 opacity-100"
                       />
-
-                      {/* Status Badges */}
-                      {isComingSoon ? (
-                        <div className="absolute top-3 left-3 bg-stone-900 text-stone-100 text-[8px] uppercase tracking-[0.25em] px-2.5 py-1 font-medium shadow-sm">
-                          Coming Soon
-                        </div>
-                      ) : (
-                        <div className="absolute top-3 left-3 bg-white/90 border border-gray-200 text-green-800 text-[8px] uppercase tracking-[0.2em] px-2 py-0.5 font-medium shadow-sm flex items-center gap-1">
-                          <span className="w-1.5 h-1.5 rounded-full bg-green-600"></span>
-                          Available
-                        </div>
-                      )}
 
                       {/* Top Right Action Icon */}
                       <div className="absolute top-3 right-3 w-7 h-7 bg-black text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -521,19 +474,15 @@ export default function Home() {
                       </div>
 
                       <div className="pt-3 border-t border-gray-100 flex items-center justify-between">
-                        <span className={`text-[10px] uppercase tracking-[0.2em] font-medium transition-colors ${
-                          isComingSoon ? "text-stone-400 group-hover:text-stone-700" : "text-gray-500 group-hover:text-black"
-                        }`}>
-                          {isComingSoon ? "Seasonal Preview" : "Explore Range"}
+                        <span className="text-[10px] uppercase tracking-[0.2em] font-medium text-gray-500 group-hover:text-black transition-colors">
+                          Explore Range
                         </span>
                         <ArrowRight className="w-3 h-3 text-gray-400 group-hover:text-black group-hover:translate-x-1 transition-all duration-300" />
                       </div>
                     </div>
 
                     {/* Bottom Accent Hover Line */}
-                    {!isComingSoon && (
-                      <div className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-black scale-x-0 group-hover:scale-x-100 origin-center transition-transform duration-500"></div>
-                    )}
+                    <div className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-black scale-x-0 group-hover:scale-x-100 origin-center transition-transform duration-500"></div>
                   </Link>
                 </motion.div>
               );
@@ -565,13 +514,13 @@ export default function Home() {
             {/* Left Framed Showcase Stage */}
             <motion.div variants={fadeUp} className="lg:col-span-6 relative">
               <div className="relative h-[440px] sm:h-[540px] lg:h-[600px] bg-white border border-gray-200 p-8 sm:p-12 shadow-sm overflow-hidden flex items-center justify-center group">
-                <Image 
-                  src="/4.jpeg" 
-                  alt="AKOD Natural Kerala Harvest" 
-                  fill 
-                  className="object-contain p-6 sm:p-10 transition-transform duration-700 ease-out group-hover:scale-105" 
+                <Image
+                  src="/4.jpeg"
+                  alt="AKOD Natural Kerala Harvest"
+                  fill
+                  className="object-contain p-6 sm:p-10 transition-transform duration-700 ease-out group-hover:scale-105"
                 />
-                
+
                 {/* Floating Heritage Badge */}
                 <div className="absolute top-6 left-6 bg-black text-white px-3.5 py-1.5 text-[8px] uppercase tracking-[0.3em] font-medium shadow-md">
                   100% Traditional Sourcing
@@ -649,16 +598,16 @@ export default function Home() {
 
               {/* Action Buttons */}
               <div className="flex flex-wrap items-center gap-6">
-                <Link 
-                  href="/products" 
+                <Link
+                  href="/products"
                   className="inline-flex items-center gap-3 px-8 py-3.5 bg-black text-white text-[10px] uppercase tracking-[0.25em] font-medium hover:bg-brand-primary hover:text-black transition-colors shadow-sm"
                 >
                   <span>Explore Provisions</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
 
-                <Link 
-                  href="/story" 
+                <Link
+                  href="/story"
                   className="text-[10px] uppercase tracking-[0.25em] font-medium text-gray-600 hover:text-black transition-colors underline underline-offset-8"
                 >
                   Read Our Origin Story &rarr;
@@ -678,7 +627,7 @@ export default function Home() {
         </div>
 
         <div className="max-w-[1400px] mx-auto px-6 sm:px-12 relative z-10">
-          <motion.div 
+          <motion.div
             {...fadeUp}
             className="max-w-3xl mx-auto flex flex-col items-center text-center"
           >
@@ -711,7 +660,7 @@ export default function Home() {
                 </span>
               </div>
             ) : (
-              <form 
+              <form
                 onSubmit={(e) => {
                   e.preventDefault();
                   if (newsletterEmail.trim()) {
