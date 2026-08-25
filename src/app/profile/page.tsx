@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-type Tab = "personal" | "addresses" | "orders" | "security";
+type Tab = "personal" | "addresses" | "orders";
 
 export default function ProfilePage() {
     const { user, logout, login } = useAuth();
@@ -216,17 +216,6 @@ export default function ProfilePage() {
                             </button>
 
                             <button
-                                onClick={() => setActiveTab("security")}
-                                className={`flex items-center justify-between px-4 py-4 border-b transition-colors group ${activeTab === "security"
-                                    ? "border-black text-black"
-                                    : "border-gray-200 text-gray-400 hover:text-black hover:border-black"
-                                    }`}
-                            >
-                                <span className="text-[10px] uppercase tracking-[0.2em] font-medium">Security & Identity</span>
-                                <ChevronRight className={`w-3.5 h-3.5 transition-transform ${activeTab === "security" ? "translate-x-1" : "group-hover:translate-x-1"}`} strokeWidth={1} />
-                            </button>
-
-                            <button
                                 onClick={handleLogout}
                                 className="flex items-center justify-between px-4 py-4 mt-8 transition-colors group text-gray-400 hover:text-red-600"
                             >
@@ -255,8 +244,21 @@ export default function ProfilePage() {
                                         </div>
                                     </div>
                                     <div>
-                                        <label className="block text-[9px] uppercase tracking-[0.2em] text-gray-400 mb-3">Email Address</label>
-                                        <input required type="email" value={profileData.email} onChange={e => setProfileData({ ...profileData, email: e.target.value })} className="w-full px-4 py-3 bg-transparent border-b border-gray-200 text-sm font-light text-gray-900 focus:border-black outline-none transition-colors" />
+                                        <div className="flex items-center justify-between mb-3">
+                                            <label className="block text-[9px] uppercase tracking-[0.2em] text-gray-400">Primary Email (Account Identity)</label>
+                                            <span className="text-[9px] uppercase tracking-wider text-green-700 bg-green-50 px-2 py-0.5 rounded font-mono font-bold border border-green-200">
+                                                ✓ Verified
+                                            </span>
+                                        </div>
+                                        <input 
+                                            readOnly 
+                                            type="email" 
+                                            value={profileData.email} 
+                                            className="w-full px-4 py-3 bg-gray-50/70 border-b border-gray-200 text-sm font-light text-gray-500 cursor-not-allowed outline-none" 
+                                        />
+                                        <p className="text-[10px] text-gray-400 mt-1.5 font-light">
+                                            Your verified email is linked to your order confirmations and authentication.
+                                        </p>
                                     </div>
                                     <div>
                                         <label className="block text-[9px] uppercase tracking-[0.2em] text-gray-400 mb-3">Phone Number</label>
@@ -365,92 +367,81 @@ export default function ProfilePage() {
                         )}
 
                         {activeTab === "orders" && (
-                            <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
-                                <h2 className="text-2xl font-serif text-gray-900 mb-8 font-light">Order History.</h2>
+                            <div className="animate-in fade-in duration-300">
+                                <div className="flex items-center justify-between mb-6 pb-3 border-b border-gray-100">
+                                    <h2 className="text-xl font-serif text-gray-900 font-light">Order History</h2>
+                                    <span className="text-[10px] uppercase tracking-widest text-gray-400 font-mono">
+                                        {orders.length} {orders.length === 1 ? 'Order' : 'Orders'}
+                                    </span>
+                                </div>
 
-                                <div className="space-y-12">
-                                    {orders.length === 0 && <div className="py-20 text-center border border-dashed border-gray-100 uppercase tracking-widest text-gray-300 text-xs">Purchase ledger is empty</div>}
+                                <div className="space-y-4">
+                                    {orders.length === 0 && (
+                                        <div className="py-12 text-center border border-dashed border-gray-200 bg-white p-6">
+                                            <p className="text-xs uppercase tracking-widest text-gray-400 font-medium">No previous orders found</p>
+                                            <Link href="/products" className="inline-block mt-3 text-[10px] uppercase tracking-[0.2em] text-brand-primary underline underline-offset-4">
+                                                Explore Collection &rarr;
+                                            </Link>
+                                        </div>
+                                    )}
                                     {orders.map((order) => (
-                                        <div key={order._id} className="border border-gray-100 bg-[#faf9f6] p-6 lg:p-8 relative group">
+                                        <div key={order._id} className="border border-gray-200 bg-white p-4 sm:p-5 shadow-sm hover:border-gray-300 transition-colors">
+                                            
+                                            {/* Compact Top Header */}
+                                            <div className="flex flex-wrap items-center justify-between border-b border-gray-100 pb-3 mb-3 gap-3 text-xs">
+                                                <div className="flex items-center gap-3 font-mono">
+                                                    <span className="font-semibold text-gray-900">#AKD-{order._id.slice(-6).toUpperCase()}</span>
+                                                    <span className="text-gray-300">&bull;</span>
+                                                    <span className="text-gray-500 font-sans text-[11px]">
+                                                        {new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                                    </span>
+                                                </div>
 
-                                            <div className="flex flex-wrap justify-between items-end border-b border-gray-200 pb-6 mb-6 gap-6">
-                                                <div>
-                                                    <p className="text-[9px] text-gray-400 uppercase tracking-[0.3em] mb-2">Order Date</p>
-                                                    <p className="font-serif text-base text-gray-900 font-light">{new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
-                                                </div>
-                                                <div>
-                                                    <p className="text-[9px] text-gray-400 uppercase tracking-[0.3em] mb-2">Investment Value</p>
-                                                    <p className="font-light text-gray-900">₹{order.totalAmount}</p>
-                                                </div>
-                                                <div>
-                                                    <p className="text-[9px] text-gray-400 uppercase tracking-[0.3em] mb-2">Ticket Node</p>
-                                                    <p className="font-light text-gray-900 font-mono text-xs uppercase">#AKD-{order._id.slice(-8)}</p>
-                                                </div>
-                                                <div>
-                                                    <Link href={`/orders/${order._id}`} className="border border-black text-black px-4 py-2 text-[9px] uppercase tracking-[0.3em] hover:bg-black hover:text-white transition-all inline-flex items-center gap-2">
-                                                        {order.status} <ChevronRight size={10} />
+                                                <div className="flex items-center gap-3">
+                                                    <span className="font-semibold text-gray-900">₹{order.totalAmount}</span>
+                                                    <span className={`px-2.5 py-0.5 rounded text-[9px] uppercase tracking-wider font-bold border ${
+                                                        order.status === 'delivered' 
+                                                            ? 'bg-green-50 text-green-700 border-green-200' 
+                                                            : order.status === 'shipped' 
+                                                            ? 'bg-blue-50 text-blue-700 border-blue-200'
+                                                            : order.status === 'cancelled'
+                                                            ? 'bg-red-50 text-red-700 border-red-200'
+                                                            : 'bg-amber-50 text-amber-700 border-amber-200'
+                                                    }`}>
+                                                        {order.status}
+                                                    </span>
+                                                    <Link 
+                                                        href={`/orders/${order._id}`} 
+                                                        className="text-[9px] uppercase tracking-[0.2em] font-semibold text-black hover:text-brand-primary underline transition-colors"
+                                                    >
+                                                        Details &rarr;
                                                     </Link>
                                                 </div>
                                             </div>
 
-                                            <div className="space-y-4">
+                                            {/* Compact Items List */}
+                                            <div className="space-y-2">
                                                 {order.items?.map((item: any, idx: number) => (
-                                                    <div key={idx} className="flex items-center gap-6">
-                                                        <div className="w-16 h-20 bg-white border border-gray-200 flex-shrink-0 overflow-hidden relative p-1">
-                                                            <Image src={item.product?.images?.[0] || "/placeholder.png"} alt={item.product?.name || "Product"} fill className="w-full h-full object-contain mix-blend-multiply opacity-80 p-1" />
+                                                    <div key={idx} className="flex items-center justify-between gap-3 text-xs py-1">
+                                                        <div className="flex items-center gap-3 min-w-0">
+                                                            <div className="w-10 h-12 bg-[#faf9f6] border border-gray-100 relative flex-shrink-0 flex items-center justify-center p-1">
+                                                                <Image 
+                                                                    src={item.product?.images?.[0] || item.product?.image || "/placeholder.png"} 
+                                                                    alt={item.product?.name || "Product"} 
+                                                                    fill 
+                                                                    className="object-contain p-0.5" 
+                                                                />
+                                                            </div>
+                                                            <p className="font-medium text-gray-900 truncate text-xs">{item.product?.name || 'Handcrafted Provision'}</p>
                                                         </div>
-                                                        <div>
-                                                            <p className="font-serif text-lg font-light text-gray-900 mb-1">{item.product?.name}</p>
-                                                            <p className="text-[10px] text-gray-400 uppercase tracking-widest">Qty: {item.quantity} &nbsp;|&nbsp; Price: ₹{item.price}</p>
-                                                        </div>
+                                                        <span className="text-[11px] text-gray-400 font-mono whitespace-nowrap">
+                                                            Qty: {item.quantity} &bull; ₹{item.price * item.quantity}
+                                                        </span>
                                                     </div>
                                                 ))}
                                             </div>
                                         </div>
                                     ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {activeTab === "security" && (
-                            <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
-                                <h2 className="text-2xl font-serif text-gray-900 mb-4 font-light">Security & Identity.</h2>
-                                <p className="text-[10px] uppercase tracking-[0.2em] text-gray-400 mb-12">Manage your verified contact methods</p>
-
-                                <div className="space-y-12 max-w-xl">
-                                    {/* Email Section */}
-                                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 p-6 bg-gray-50/50 border border-gray-100">
-                                        <div>
-                                            <p className="text-[9px] uppercase tracking-[0.2em] text-gray-400 mb-1">Primary Email</p>
-                                            <p className="text-sm font-medium text-gray-900">{user?.email}</p>
-                                        </div>
-                                        <button 
-                                            onClick={() => toast.info("Email update with OTP coming soon")}
-                                            className="text-[9px] uppercase tracking-[0.2em] font-bold text-brand-primary border-b border-brand-primary pb-0.5 self-start md:self-center"
-                                        >
-                                            Update Email
-                                        </button>
-                                    </div>
-
-                                    {/* Phone Section */}
-                                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 p-6 bg-gray-50/50 border border-gray-100">
-                                        <div>
-                                            <p className="text-[9px] uppercase tracking-[0.2em] text-gray-400 mb-1">Verified Mobile</p>
-                                            <p className="text-sm font-medium text-gray-900">{user?.phone}</p>
-                                        </div>
-                                        <button 
-                                            onClick={() => toast.info("Phone update with OTP coming soon")}
-                                            className="text-[9px] uppercase tracking-[0.2em] font-bold text-brand-primary border-b border-brand-primary pb-0.5 self-start md:self-center"
-                                        >
-                                            Update Mobile
-                                        </button>
-                                    </div>
-
-                                    <div className="pt-8 border-t border-gray-100">
-                                        <p className="text-[11px] text-gray-400 leading-relaxed italic">
-                                            &quot;For your security, changing your primary contact information requires verification via a one-time security key sent to your new destination.&quot;
-                                        </p>
-                                    </div>
                                 </div>
                             </div>
                         )}
