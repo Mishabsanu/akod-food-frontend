@@ -270,7 +270,7 @@ export default function StoryPage() {
                                             href="/products" 
                                             className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] font-medium text-gray-900 group-hover:text-brand-primary transition-colors"
                                         >
-                                            <span>Shop Category</span>
+                                            <span>Shop Collection</span>
                                             <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
                                         </Link>
                                     </div>

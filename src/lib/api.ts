@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { clientCache } from './cache';
 
 // Self-contained Next.js serverless API routes
 const API_URL = '/api/';
@@ -64,9 +65,23 @@ export const customerApi = {
   setDefaultAddress: (id: string) => api.patch(`customers/addresses/${id}/default`),
   
   // Public Data
-  getProducts: (params?: any) => api.get('products', { params }),
+  getProducts: async (params?: any) => {
+    const res = await api.get('products', { params });
+    if (res.data?.data && (!params || Object.keys(params).length === 0)) {
+      clientCache.set('products_all', res.data.data);
+    }
+    return res;
+  },
+  getCachedProducts: () => clientCache.get<any[]>('products_all'),
   getProductById: (id: string) => api.get(`products/${id}`),
-  getCategories: () => api.get('categories'),
+  getCategories: async () => {
+    const res = await api.get('categories');
+    if (res.data?.data) {
+      clientCache.set('categories_all', res.data.data);
+    }
+    return res;
+  },
+  getCachedCategories: () => clientCache.get<any[]>('categories_all'),
   
   // Cart
   getCart: () => api.get('cart'),

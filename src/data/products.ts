@@ -10,6 +10,9 @@ export interface Product {
   image: string;
   gallery?: string[];
   category: string;
+  flavor?: string;
+  instagramVideoUrl?: string;
+  videoUrl?: string;
   variants: ProductVariant[];
   rating: number;
   reviewsCount: number;
@@ -31,6 +34,8 @@ export const products: Product[] = [
     image: "/4.jpeg",
     gallery: ["/4.jpeg", "/5.jpg", "/3.jpeg", "/2.jpeg", "/4.jpeg"],
     category: "Banana Chips",
+    flavor: "Spicy & Masala",
+    instagramVideoUrl: "https://www.instagram.com/reel/C218aBqv9Zf/",
     variants: [
       { weight: "50g", price: 45 },
       { weight: "100g", price: 85 },
@@ -48,6 +53,8 @@ export const products: Product[] = [
     image: "/5.jpg",
     gallery: ["/5.jpg", "/4.jpeg", "/3.jpeg", "/2.jpeg", "/5.jpg"],
     category: "Banana Chips",
+    flavor: "Classic Salted",
+    instagramVideoUrl: "https://www.instagram.com/reel/C287aBqv1Zk/",
     variants: defaultVariants,
     rating: 4.9,
     reviewsCount: 210
@@ -59,6 +66,8 @@ export const products: Product[] = [
     image: "/3.jpeg",
     gallery: ["/3.jpeg", "/5.jpg", "/4.jpeg", "/2.jpeg", "/3.jpeg"],
     category: "Banana Chips",
+    flavor: "Sweet Jaggery (Upperi)",
+    instagramVideoUrl: "https://www.instagram.com/reel/C198aBqw3Zp/",
     variants: defaultVariants,
     rating: 4.7,
     reviewsCount: 89

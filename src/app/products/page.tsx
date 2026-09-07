@@ -2,20 +2,20 @@
 
 import { useState, useMemo, useEffect } from "react";
 import ProductCard from "@/components/ui/ProductCard";
-import { SlidersHorizontal, ChevronDown, Check, X, Loader2, ArrowUpDown, Tag, RotateCcw } from "lucide-react";
+import ProductCardSkeleton from "@/components/ui/ProductCardSkeleton";
+import { SlidersHorizontal, ChevronDown, Check, X, Sparkles } from "lucide-react";
 import { customerApi } from "@/lib/api";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { products as fallbackCatalog } from "@/data/products";
 
 export default function ShopPage() {
     const searchParams = useSearchParams();
-    const categoryParam = searchParams.get("category");
+    const flavorParam = searchParams.get("flavor");
 
     const [allProducts, setAllProducts] = useState<any[]>([]);
-    const [categories, setCategories] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     
-    const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [selectedFlavors, setSelectedFlavors] = useState<string[]>([]);
     const [selectedWeights, setSelectedWeights] = useState<string[]>([]);
     const [minPrice, setMinPrice] = useState<string>("");
@@ -24,24 +24,36 @@ export default function ShopPage() {
     const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
     useEffect(() => {
-        if (categoryParam) {
-            setSelectedCategories([categoryParam]);
+        if (flavorParam) {
+            setSelectedFlavors([flavorParam]);
         } else {
-            setSelectedCategories([]);
+            setSelectedFlavors([]);
         }
-    }, [categoryParam]);
+    }, [flavorParam]);
 
     useEffect(() => {
+        // 1. Instant Cache Hydration (0ms load)
+        const cachedProds = customerApi.getCachedProducts();
+        if (cachedProds && cachedProds.length > 0) {
+            setAllProducts(cachedProds);
+            setLoading(false);
+        }
+
+        // 2. Background Revalidation (stays dynamic & fresh without delay)
         const fetchData = async () => {
             try {
-                const [prodRes, catRes] = await Promise.all([
-                    customerApi.getProducts(),
-                    customerApi.getCategories()
-                ]);
-                setAllProducts(prodRes.data.data || []);
-                setCategories(catRes.data.data || []);
+                const prodRes = await customerApi.getProducts();
+                const fetchedProds = prodRes.data?.data;
+                if (fetchedProds && fetchedProds.length > 0) {
+                    setAllProducts(fetchedProds);
+                } else if (!cachedProds || cachedProds.length === 0) {
+                    setAllProducts(fallbackCatalog.map(p => ({ ...p, _id: p.id })));
+                }
             } catch (error) {
                 console.error("Fetch failed", error);
+                if (!cachedProds || cachedProds.length === 0) {
+                    setAllProducts(fallbackCatalog.map(p => ({ ...p, _id: p.id })));
+                }
             } finally {
                 setLoading(false);
             }
@@ -49,7 +61,7 @@ export default function ShopPage() {
         fetchData();
     }, []);
 
-    const flavors = ["Classic", "Spicy", "Sweet"];
+    const flavors = ["Classic Salted", "Spicy & Masala", "Sweet Jaggery (Upperi)"];
     const weights = ["50g", "100g", "250g", "500g", "1kg"];
 
     const pricePresets = [
@@ -66,10 +78,6 @@ export default function ShopPage() {
         { id: "rating-desc", label: "Highest Rated" },
         { id: "name-asc", label: "Alphabetical (A-Z)" },
     ];
-
-    const toggleCategory = (catId: string) => {
-        setSelectedCategories(prev => prev.includes(catId) ? prev.filter(c => c !== catId) : [...prev, catId]);
-    };
 
     const toggleFlavor = (flavor: string) => {
         setSelectedFlavors(prev => prev.includes(flavor) ? prev.filter(f => f !== flavor) : [...prev, flavor]);
@@ -90,7 +98,6 @@ export default function ShopPage() {
     };
 
     const clearAll = () => {
-        setSelectedCategories([]);
         setSelectedFlavors([]);
         setSelectedWeights([]);
         setMinPrice("");
@@ -98,49 +105,23 @@ export default function ShopPage() {
         setSortOption("featured");
     };
 
-    // Robust category name resolver
-    const activeCategoryObject = useMemo(() => {
-        if (selectedCategories.length === 1) {
-            const selId = selectedCategories[0];
-            return categories.find(c => String(c._id) === String(selId) || c.name.toLowerCase() === String(selId).toLowerCase()) || null;
-        }
-        return null;
-    }, [selectedCategories, categories]);
-
-    const activeFilterCount = selectedCategories.length + selectedFlavors.length + selectedWeights.length + (minPrice || maxPrice ? 1 : 0) + (sortOption !== "featured" ? 1 : 0);
+    const activeFilterCount = selectedFlavors.length + selectedWeights.length + (minPrice || maxPrice ? 1 : 0) + (sortOption !== "featured" ? 1 : 0);
 
     const filteredAndSortedProducts = useMemo(() => {
         let result = allProducts.filter(product => {
-            // Category Filter (support ObjectId string, populated object, or exact name)
-            if (selectedCategories.length > 0) {
-                const prodCatId = typeof product.category === 'object' ? String(product.category?._id || '') : String(product.category || '');
-                const prodCatName = typeof product.category === 'object' ? String(product.category?.name || '') : String(product.category || '');
-                
-                const matches = selectedCategories.some(selId => {
-                    if (String(prodCatId) === String(selId)) return true;
-                    if (String(prodCatName).toLowerCase() === String(selId).toLowerCase()) return true;
-                    
-                    const foundCat = categories.find(c => String(c._id) === String(selId) || c.name.toLowerCase() === String(selId).toLowerCase());
-                    if (foundCat) {
-                        if (String(foundCat._id) === String(prodCatId)) return true;
-                        if (foundCat.name.toLowerCase() === String(prodCatName).toLowerCase()) return true;
-                    }
-                    return false;
-                });
-                if (!matches) return false;
-            }
-
-            // Flavor Filter (Simulated based on name)
+            // Flavor Filter (Matches flavor field or product name keywords)
             if (selectedFlavors.length > 0) {
                 const nameLower = (product.name || "").toLowerCase();
-                const isSpicy = nameLower.includes("spicy") || nameLower.includes("chili") || nameLower.includes("masala");
-                const isSweet = nameLower.includes("sweet") || nameLower.includes("jaggery") || nameLower.includes("upperi");
-                const isClassic = !isSpicy && !isSweet;
+                const prodFlavorLower = (product.flavor || "").toLowerCase();
+
+                const isSpicy = nameLower.includes("spicy") || nameLower.includes("chili") || nameLower.includes("masala") || prodFlavorLower.includes("spicy") || prodFlavorLower.includes("masala");
+                const isSweet = nameLower.includes("sweet") || nameLower.includes("jaggery") || nameLower.includes("upperi") || prodFlavorLower.includes("sweet") || prodFlavorLower.includes("jaggery");
+                const isClassic = (!isSpicy && !isSweet) || prodFlavorLower.includes("classic") || prodFlavorLower.includes("salted") || nameLower.includes("normal") || nameLower.includes("classic") || nameLower.includes("salted");
 
                 let flavorMatch = false;
-                if (selectedFlavors.includes("Spicy") && isSpicy) flavorMatch = true;
-                if (selectedFlavors.includes("Sweet") && isSweet) flavorMatch = true;
-                if (selectedFlavors.includes("Classic") && isClassic) flavorMatch = true;
+                if (selectedFlavors.some(f => f.includes("Spicy") || f.toLowerCase() === "spicy") && isSpicy) flavorMatch = true;
+                if (selectedFlavors.some(f => f.includes("Sweet") || f.toLowerCase() === "sweet") && isSweet) flavorMatch = true;
+                if (selectedFlavors.some(f => f.includes("Classic") || f.toLowerCase() === "classic") && isClassic) flavorMatch = true;
 
                 if (!flavorMatch) return false;
             }
@@ -175,13 +156,7 @@ export default function ShopPage() {
         });
 
         return result;
-    }, [allProducts, selectedCategories, selectedFlavors, selectedWeights, minPrice, maxPrice, sortOption, categories]);
-
-    if (loading) return (
-        <div className="min-h-screen flex items-center justify-center bg-[#faf9f6]">
-            <Loader2 className="w-10 h-10 text-black animate-spin" strokeWidth={1} />
-        </div>
-    );
+    }, [allProducts, selectedFlavors, selectedWeights, minPrice, maxPrice, sortOption]);
 
     return (
         <div className="bg-[#faf9f6] min-h-screen pb-32 font-sans selection:bg-brand-primary/20 selection:text-black">
@@ -197,18 +172,16 @@ export default function ShopPage() {
                                 </Link>
                                 <span className="text-gray-300 text-[10px]">/</span>
                                 <span className="text-[9px] uppercase tracking-[0.3em] font-medium text-brand-primary">
-                                    {activeCategoryObject ? activeCategoryObject.name : "Our Collection"}
+                                    Our Collection
                                 </span>
                             </div>
                             <div className="flex flex-wrap items-baseline gap-2.5">
                                 <h1 className="text-xl md:text-2xl font-serif text-gray-900 font-light tracking-tight">
-                                    {activeCategoryObject ? `${activeCategoryObject.name}.` : "Our Shop."}
+                                    Authentic Kerala Chips.
                                 </h1>
-                                {activeCategoryObject?.description && (
-                                    <span className="text-xs font-light text-gray-400 hidden sm:inline">
-                                        — {activeCategoryObject.description}
-                                    </span>
-                                )}
+                                <span className="text-xs font-light text-gray-400 hidden sm:inline">
+                                    — Fried in 100% Pure Coconut Oil
+                                </span>
                             </div>
                         </div>
 
@@ -272,41 +245,14 @@ export default function ShopPage() {
                                 )}
                             </div>
 
-                            {/* Section: Category */}
+                            {/* Section: Flavor Profile */}
                             <div className="mb-8">
                                 <div className="flex items-center gap-2 mb-4">
-                                    <Tag className="w-3 h-3 text-gray-400" />
+                                    <Sparkles className="w-3.5 h-3.5 text-brand-primary" />
                                     <h3 className="text-[10px] uppercase tracking-[0.25em] text-gray-400 font-medium">
-                                        Category
+                                        Flavor Profile
                                     </h3>
                                 </div>
-                                <ul className="space-y-3">
-                                    {categories.map(cat => {
-                                        const isChecked = selectedCategories.includes(cat._id) || selectedCategories.includes(cat.name);
-                                        return (
-                                            <li key={cat._id}>
-                                                <button 
-                                                    onClick={() => toggleCategory(cat._id)} 
-                                                    className="flex items-start gap-3.5 group w-full text-left"
-                                                >
-                                                    <div className={`flex-shrink-0 w-3.5 h-3.5 mt-0.5 flex items-center justify-center transition-colors ${isChecked ? "bg-black border-black" : "border border-gray-300 group-hover:border-black"}`}>
-                                                        {isChecked && <Check className="h-2.5 w-2.5 text-white" strokeWidth={3} />}
-                                                    </div>
-                                                    <span className={`text-[13px] font-light tracking-wide transition-colors ${isChecked ? "text-black font-medium" : "text-gray-500 group-hover:text-black"}`}>
-                                                        {cat.name}
-                                                    </span>
-                                                </button>
-                                            </li>
-                                        );
-                                    })}
-                                </ul>
-                            </div>
-
-                            {/* Section: Flavor */}
-                            <div className="mb-8 pt-6 border-t border-gray-100">
-                                <h3 className="text-[10px] uppercase tracking-[0.25em] text-gray-400 mb-4 font-medium">
-                                    Flavor Profile
-                                </h3>
                                 <ul className="space-y-3">
                                     {flavors.map(flavor => {
                                         const isChecked = selectedFlavors.includes(flavor);
@@ -466,20 +412,6 @@ export default function ShopPage() {
                                         </button>
                                     )}
 
-                                    {selectedCategories.map(catId => {
-                                        const catObj = categories.find(c => String(c._id) === String(catId) || c.name === catId);
-                                        return (
-                                            <button 
-                                                key={catId} 
-                                                onClick={() => toggleCategory(catId)}
-                                                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-gray-200 hover:border-black text-[11px] font-light text-gray-800 transition-colors"
-                                            >
-                                                <span>Category: {catObj ? catObj.name : catId}</span>
-                                                <X className="w-3 h-3 text-gray-400 hover:text-black" />
-                                            </button>
-                                        );
-                                    })}
-
                                     {selectedFlavors.map(flavor => (
                                         <button 
                                             key={flavor} 
@@ -523,24 +455,16 @@ export default function ShopPage() {
                         </div>
 
                         {/* Products Grid & Loading Skeletons */}
-                        {loading ? (
+                        {loading && allProducts.length === 0 ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
                                 {[1, 2, 3, 4, 5, 6].map((n) => (
-                                    <div key={n} className="bg-white border border-gray-200 p-5 animate-pulse flex flex-col">
-                                        <div className="aspect-square bg-stone-100 mb-4 w-full"></div>
-                                        <div className="h-3.5 bg-stone-200 w-3/4 mb-2"></div>
-                                        <div className="h-2.5 bg-stone-100 w-1/2 mb-4"></div>
-                                        <div className="mt-auto pt-3 border-t border-stone-100 flex justify-between items-center">
-                                            <div className="h-4 bg-stone-200 w-1/4"></div>
-                                            <div className="h-7 bg-stone-200 w-20"></div>
-                                        </div>
-                                    </div>
+                                    <ProductCardSkeleton key={n} />
                                 ))}
                             </div>
                         ) : filteredAndSortedProducts.length > 0 ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
                                 {filteredAndSortedProducts.map((product) => (
-                                    <ProductCard key={product._id} product={product} />
+                                    <ProductCard key={product._id || product.id} product={product} />
                                 ))}
                             </div>
                         ) : (

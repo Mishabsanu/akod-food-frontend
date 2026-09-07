@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { products } from "@/data/products";
 import ProductCard from "@/components/ui/ProductCard";
+import ProductCardSkeleton from "@/components/ui/ProductCardSkeleton";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight, ArrowRight, ArrowUpRight, ShieldCheck, Flame, Leaf, Sparkles, Mail, Check } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
+import { products as fallbackCatalog } from "@/data/products";
 
 import { customerApi } from "@/lib/api";
 
@@ -14,20 +15,41 @@ export default function Home() {
   const [allProducts, setAllProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [newsletterEmail, setNewsletterEmail] = useState("");
-  const [newsletterSubmitted, setNewsletterSubmitted] = useState(false);
 
   useEffect(() => {
+    // 1. Instant Cache Hydration (0ms load)
+    const cachedProds = customerApi.getCachedProducts();
+    const cachedCats = customerApi.getCachedCategories();
+    if (cachedProds && cachedProds.length > 0) {
+      setAllProducts(cachedProds);
+      setLoading(false);
+    }
+    if (cachedCats && cachedCats.length > 0) {
+      setCategories(cachedCats);
+    }
+
+    // 2. Background Revalidation (stays dynamic & fresh without blocking UI)
     const fetchData = async () => {
       try {
         const [prodRes, catRes] = await Promise.all([
-          customerApi.getProducts({ limit: 4 }),
+          customerApi.getProducts(),
           customerApi.getCategories()
         ]);
-        setAllProducts(prodRes.data.data || []);
-        setCategories(catRes.data.data || []);
+        const fetchedProds = prodRes.data?.data;
+        const fetchedCats = catRes.data?.data;
+        if (fetchedProds && fetchedProds.length > 0) {
+          setAllProducts(fetchedProds);
+        } else if (!cachedProds || cachedProds.length === 0) {
+          setAllProducts(fallbackCatalog.map(p => ({ ...p, _id: p.id })));
+        }
+        if (fetchedCats && fetchedCats.length > 0) {
+          setCategories(fetchedCats);
+        }
       } catch (error) {
         console.error("Fetch failed", error);
+        if (!cachedProds || cachedProds.length === 0) {
+          setAllProducts(fallbackCatalog.map(p => ({ ...p, _id: p.id })));
+        }
       } finally {
         setLoading(false);
       }
@@ -87,46 +109,6 @@ export default function Home() {
 
   const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % slides.length);
   const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
-
-  const fallbackCategories = [
-    {
-      _id: "banana-chips",
-      name: "Traditional Banana Chips",
-      description: "Crispy Kerala Nendran slices prepared in pure cold-pressed coconut oil",
-      image: "/5.jpg",
-      isComingSoon: false
-    },
-    {
-      _id: "flavoured-chips",
-      name: "Flavoured Banana Chips",
-      description: "Fiery red chili, peri-peri & new-generation heritage spice blends",
-      image: "/4.jpeg",
-      isComingSoon: true
-    },
-    {
-      _id: "jackfruit-chips",
-      name: "Jackfruit Chips (Chakka)",
-      description: "Naturally sweet, aromatic tropical crunch from fresh Kerala jackfruit",
-      image: "/3.jpeg",
-      isComingSoon: true
-    },
-    {
-      _id: "tapioca-chips",
-      name: "Tapioca Chips (Kappa)",
-      description: "Handcrafted crunch from pristine farm-fresh cassava roots",
-      image: "/2.jpeg",
-      isComingSoon: true
-    }
-  ];
-
-  const getCategoryImage = (cat: any, index: number) => {
-    if (cat.image && cat.image !== "/placeholder.png") return cat.image;
-    const fallbacks = ["/5.jpg", "/4.jpeg", "/3.jpeg", "/2.jpeg", "/1.jpeg"];
-    return fallbacks[index % fallbacks.length];
-  };
-
-  // Display real available categories
-  const displayCategories = (categories && categories.length > 0) ? categories : fallbackCategories;
 
   return (
     <div className="flex flex-col w-full bg-[#faf9f6] selection:bg-brand-primary/20 selection:text-black min-h-screen">
@@ -307,43 +289,59 @@ export default function Home() {
         </div>
       </section>
 
-      {/* The Collection (Asymmetrical Grid) */}
+      {/* The Collection (All Products Grid) */}
       <section className="py-20 lg:py-32 bg-white">
         <div className="max-w-[1400px] mx-auto px-6 sm:px-12">
-          <div className="flex flex-col md:flex-row justify-between items-end mb-20">
-            <motion.div {...fadeUp} className="max-w-md">
-              <h2 className="text-3xl lg:text-4xl font-serif text-gray-900 mb-4 font-light">Our Collection</h2>
-              <p className="text-sm font-light text-gray-500 leading-relaxed">
-                Check out our best-selling snacks, made using traditional methods to keep the real flavor.
+          <div className="flex flex-col md:flex-row justify-between items-end mb-16">
+            <motion.div {...fadeUp} className="max-w-xl">
+              <div className="flex items-center gap-2.5 mb-3">
+                <span className="w-1.5 h-1.5 rounded-full bg-brand-primary"></span>
+                <p className="text-[10px] uppercase tracking-[0.35em] font-semibold text-brand-primary">
+                  All Provisions & Snacks
+                </p>
+              </div>
+              <h2 className="text-3xl lg:text-5xl font-serif text-gray-900 mb-4 font-light tracking-tight">Our Collection</h2>
+              <p className="text-sm font-light text-gray-500 leading-relaxed max-w-lg">
+                Handcrafted South Indian snacks and delicacies, prepared in small wood-fire batches using 100% pure coconut oil and natural ingredients.
               </p>
             </motion.div>
             <motion.div {...fadeUp} className="hidden md:block pb-2">
-              <Link href="/products" className="text-[10px] uppercase tracking-[0.2em] font-light text-black hover:text-brand-primary transition-colors border-b border-black hover:border-brand-primary pb-1">
-                View Collection
+              <Link href="/products" className="group inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] font-medium text-black hover:text-brand-primary transition-colors border-b border-black hover:border-brand-primary pb-1">
+                <span>View Full Shop ({allProducts.length} Items)</span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
               </Link>
             </motion.div>
           </div>
 
-          <motion.div
-            variants={stagger}
-            initial="initial"
-            whileInView="whileInView"
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8"
-          >
-            {allProducts.map((product, index) => (
-              <motion.div
-                variants={fadeUp}
-                key={product._id}
-                className={index % 2 === 0 ? "md:-translate-y-8" : "md:translate-y-8"}
-              >
-                <ProductCard product={product} />
-              </motion.div>
-            ))}
-          </motion.div>
+          {loading && allProducts.length === 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+                <ProductCardSkeleton key={n} />
+              ))}
+            </div>
+          ) : (
+            <motion.div
+              variants={stagger}
+              initial="initial"
+              whileInView="whileInView"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8"
+            >
+              {allProducts.map((product) => (
+                <motion.div
+                  variants={fadeUp}
+                  key={product._id || product.id}
+                  className="h-full"
+                >
+                  <ProductCard product={product} />
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
 
-          <div className="mt-20 text-center md:hidden">
-            <Link href="/products" className="text-[10px] uppercase tracking-[0.2em] font-light text-black hover:text-brand-primary transition-colors border-b border-black pb-1">
-              View Collection
+          <div className="mt-16 text-center md:hidden">
+            <Link href="/products" className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-black text-white text-[10px] uppercase tracking-[0.2em] font-medium hover:bg-brand-primary hover:text-black transition-colors">
+              <span>View Full Shop ({allProducts.length} Items)</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
         </div>
@@ -394,320 +392,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Categories Showcase (Our Range) */}
-      <section className="py-24 md:py-32 bg-white border-t border-stone-200/70">
-        <div className="max-w-[1400px] mx-auto px-6 sm:px-12">
-          {/* Header */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-14 md:mb-18 gap-6">
-            <motion.div {...fadeUp} className="max-w-xl">
-              <div className="flex items-center gap-2.5 mb-3">
-                <span className="w-1.5 h-1.5 rounded-full bg-brand-primary"></span>
-                <p className="text-[11px] uppercase tracking-[0.35em] font-semibold text-brand-primary">
-                  Our Range
-                </p>
-              </div>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-light text-stone-900 tracking-tight">
-                Shop by Category
-              </h2>
-              <p className="text-sm text-stone-500 font-light mt-3 leading-relaxed max-w-md">
-                Handcrafted South Indian delicacies, prepared in small batches using pure coconut oil, fresh natural ingredients, and time-honored recipes.
-              </p>
-            </motion.div>
 
-            <motion.div {...fadeUp} className="hidden md:flex pb-2">
-              <Link
-                href="/products"
-                className="group inline-flex items-center gap-3 text-xs uppercase tracking-[0.2em] font-medium text-stone-900 hover:text-brand-primary transition-colors pb-1 border-b border-stone-900 hover:border-brand-primary"
-              >
-                <span>View All Products</span>
-                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1.5 transition-transform duration-300" />
-              </Link>
-            </motion.div>
-          </div>
-
-          {/* Cards Grid - Sharp Square Minimalist */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-            {displayCategories.map((cat: any, idx: number) => {
-              const catImage = getCategoryImage(cat, idx);
-              const targetUrl = cat._id && typeof cat._id === "string" && cat._id.length === 24
-                ? `/products?category=${cat._id}`
-                : `/products?category=${encodeURIComponent(cat.name || cat._id)}`;
-
-              return (
-                <motion.div
-                  key={cat._id || idx}
-                  initial={{ opacity: 0, y: 25 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: idx * 0.1, ease: "easeOut" }}
-                  viewport={{ once: true }}
-                  className="h-full"
-                >
-                  <Link
-                    href={targetUrl}
-                    className="group flex flex-col h-full bg-white p-4 sm:p-5 border border-gray-200/80 hover:border-black shadow-sm transition-all duration-500 relative"
-                  >
-                    {/* Dedicated Square Image Showcase Stage */}
-                    <div className="relative aspect-square w-full bg-[#faf9f6] flex items-center justify-center p-6 mb-5 overflow-hidden">
-                      <Image
-                        src={catImage}
-                        alt={cat.name}
-                        fill
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                        className="object-contain w-full h-full p-2 transition-transform duration-700 ease-out group-hover:scale-105 opacity-100"
-                      />
-
-                      {/* Top Right Action Icon */}
-                      <div className="absolute top-3 right-3 w-7 h-7 bg-black text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <ArrowUpRight className="w-3.5 h-3.5" />
-                      </div>
-                    </div>
-
-                    {/* Metadata & Title */}
-                    <div className="flex flex-col flex-1 justify-between text-center">
-                      <div>
-                        <h3 className="font-serif text-lg font-light text-gray-900 mb-2 italic tracking-tight group-hover:text-black transition-colors">
-                          {cat.name}
-                        </h3>
-                        <p className="text-xs text-gray-500 font-light line-clamp-2 leading-relaxed mb-4">
-                          {cat.description || "Authentic handmade Kerala recipe made in small wood-fire batches."}
-                        </p>
-                      </div>
-
-                      <div className="pt-3 border-t border-gray-100 flex items-center justify-between">
-                        <span className="text-[10px] uppercase tracking-[0.2em] font-medium text-gray-500 group-hover:text-black transition-colors">
-                          Explore Range
-                        </span>
-                        <ArrowRight className="w-3 h-3 text-gray-400 group-hover:text-black group-hover:translate-x-1 transition-all duration-300" />
-                      </div>
-                    </div>
-
-                    {/* Bottom Accent Hover Line */}
-                    <div className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-black scale-x-0 group-hover:scale-x-100 origin-center transition-transform duration-500"></div>
-                  </Link>
-                </motion.div>
-              );
-            })}
-          </div>
-
-          {/* Mobile View All Button */}
-          <div className="mt-10 text-center md:hidden">
-            <Link
-              href="/products"
-              className="inline-flex items-center justify-center gap-2.5 px-8 py-3 bg-black text-white text-xs uppercase tracking-[0.2em] font-medium hover:bg-brand-primary transition-colors"
-            >
-              <span>View All Products</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Why Choose AKOD: Natural & Pure Section */}
-      <section className="py-24 md:py-32 bg-[#faf9f6] border-t border-gray-200/80">
-        <div className="max-w-[1400px] mx-auto px-6 sm:px-12">
-          <motion.div
-            variants={stagger}
-            initial="initial"
-            whileInView="whileInView"
-            className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center"
-          >
-            {/* Left Framed Showcase Stage */}
-            <motion.div variants={fadeUp} className="lg:col-span-6 relative">
-              <div className="relative h-[440px] sm:h-[540px] lg:h-[600px] bg-white border border-gray-200 p-8 sm:p-12 shadow-sm overflow-hidden flex items-center justify-center group">
-                <Image
-                  src="/4.jpeg"
-                  alt="AKOD Natural Kerala Harvest"
-                  fill
-                  className="object-contain p-6 sm:p-10 transition-transform duration-700 ease-out group-hover:scale-105"
-                />
-
-                {/* Floating Heritage Badge */}
-                <div className="absolute top-6 left-6 bg-black text-white px-3.5 py-1.5 text-[8px] uppercase tracking-[0.3em] font-medium shadow-md">
-                  100% Traditional Sourcing
-                </div>
-
-                {/* Subtitle bottom banner */}
-                <div className="absolute bottom-6 left-6 right-6 bg-white/95 border border-gray-200 backdrop-blur-sm p-4 flex items-center justify-between shadow-sm">
-                  <div>
-                    <span className="text-[9px] uppercase tracking-[0.25em] text-brand-primary font-semibold block">Artisanal Purity</span>
-                    <p className="text-xs text-gray-900 font-serif font-light">Small Wood-Fire Batches in Brass Urulis</p>
-                  </div>
-                  <Sparkles className="w-4 h-4 text-brand-primary flex-shrink-0" />
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Right Content & 4 Quality Pillars */}
-            <motion.div variants={fadeUp} className="lg:col-span-6 flex flex-col justify-center">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-[10px] uppercase tracking-[0.3em] font-semibold text-brand-primary">Why Choose AKOD</span>
-                <span className="text-gray-300">&bull;</span>
-                <span className="text-[9px] uppercase tracking-[0.2em] text-gray-400 font-medium">The Purity Standard</span>
-              </div>
-
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-gray-900 mb-6 font-light leading-tight">
-                Natural, Authentic &amp; Pure.
-              </h2>
-
-              <p className="text-sm text-gray-600 font-light leading-relaxed mb-8">
-                What sets AKOD apart is our refusal to take shortcuts. While commercial snacks rely on industrial palm oil and artificial enhancers, we honor Kerala&apos;s authentic wood-fire heritage. Every chip is sliced from hand-picked Nendran bananas and slow-crisped in 100% pure cold-pressed coconut oil.
-              </p>
-
-              {/* 4 Purity Pillars in a 2x2 Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-10">
-                <div className="p-4 bg-white border border-gray-200">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <Leaf className="w-3.5 h-3.5 text-brand-primary" />
-                    <h3 className="text-xs uppercase tracking-wider font-semibold text-gray-900">Pure Coconut Oil</h3>
-                  </div>
-                  <p className="text-[11px] font-light text-gray-500 leading-relaxed">
-                    100% cold-pressed coconut oil with zero palm oil or chemical substitutes.
-                  </p>
-                </div>
-
-                <div className="p-4 bg-white border border-gray-200">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <Flame className="w-3.5 h-3.5 text-brand-primary" />
-                    <h3 className="text-xs uppercase tracking-wider font-semibold text-gray-900">Wood-Fire Batches</h3>
-                  </div>
-                  <p className="text-[11px] font-light text-gray-500 leading-relaxed">
-                    Slow-cooked in traditional brass kettles for an unmistakable artisanal aroma.
-                  </p>
-                </div>
-
-                <div className="p-4 bg-white border border-gray-200">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <ShieldCheck className="w-3.5 h-3.5 text-brand-primary" />
-                    <h3 className="text-xs uppercase tracking-wider font-semibold text-gray-900">Farm-Direct Nendran</h3>
-                  </div>
-                  <p className="text-[11px] font-light text-gray-500 leading-relaxed">
-                    Hand-harvested bananas directly from Kerala plantations for golden crunch.
-                  </p>
-                </div>
-
-                <div className="p-4 bg-white border border-gray-200">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-brand-primary" />
-                    <h3 className="text-xs uppercase tracking-wider font-semibold text-gray-900">Zero Additives</h3>
-                  </div>
-                  <p className="text-[11px] font-light text-gray-500 leading-relaxed">
-                    No artificial preservatives or colorings. Just pure food as nature intended.
-                  </p>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex flex-wrap items-center gap-6">
-                <Link
-                  href="/products"
-                  className="inline-flex items-center gap-3 px-8 py-3.5 bg-black text-white text-[10px] uppercase tracking-[0.25em] font-medium hover:bg-brand-primary hover:text-black transition-colors shadow-sm"
-                >
-                  <span>Explore Provisions</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
-
-                <Link
-                  href="/story"
-                  className="text-[10px] uppercase tracking-[0.25em] font-medium text-gray-600 hover:text-black transition-colors underline underline-offset-8"
-                >
-                  Read Our Origin Story &rarr;
-                </Link>
-              </div>
-
-            </motion.div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Full-Width Newsletter Section: The AKOD Circle */}
-      <section className="w-full py-28 md:py-36 bg-white border-t border-stone-200/80 relative overflow-hidden">
-        {/* Subtle Background Watermark */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[160px] md:text-[220px] font-serif font-light text-stone-100/50 pointer-events-none select-none tracking-widest whitespace-nowrap">
-          AKOD FOODS
-        </div>
-
-        <div className="max-w-[1400px] mx-auto px-6 sm:px-12 relative z-10">
-          <motion.div
-            {...fadeUp}
-            className="max-w-3xl mx-auto flex flex-col items-center text-center"
-          >
-            {/* Tag */}
-            <div className="flex items-center gap-2 mb-4">
-              <span className="w-1.5 h-1.5 rounded-full bg-brand-primary"></span>
-              <span className="text-[10px] uppercase tracking-[0.35em] font-semibold text-brand-primary">
-                The AKOD Harvest Circle
-              </span>
-            </div>
-
-            {/* Large Editorial Headline */}
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-serif text-stone-900 mb-6 font-light leading-tight tracking-tight">
-              Stay Connected to Kerala.
-            </h2>
-
-            {/* Narrative */}
-            <p className="text-sm sm:text-base text-stone-600 font-light leading-relaxed mb-10 max-w-xl">
-              Join our private dispatch for stories from Kerala&apos;s heritage plantations, early access to limited seasonal harvests, and exclusive culinary offerings.
-            </p>
-
-            {/* Interactive Subscription Form */}
-            {newsletterSubmitted ? (
-              <div className="w-full max-w-lg p-6 bg-green-50 border border-green-200 text-green-900 flex items-center justify-center gap-3 animate-in fade-in duration-300">
-                <div className="w-6 h-6 rounded-full bg-green-700 text-white flex items-center justify-center flex-shrink-0">
-                  <Check className="w-3.5 h-3.5" />
-                </div>
-                <span className="text-xs font-medium tracking-wide">
-                  Welcome to the AKOD Circle. Please check your inbox for our seasonal welcome note.
-                </span>
-              </div>
-            ) : (
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  if (newsletterEmail.trim()) {
-                    setNewsletterSubmitted(true);
-                  }
-                }}
-                className="w-full max-w-xl flex flex-col sm:flex-row gap-3"
-              >
-                <div className="relative flex-1">
-                  <Mail className="w-4 h-4 text-stone-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
-                  <input
-                    type="email"
-                    required
-                    value={newsletterEmail}
-                    onChange={(e) => setNewsletterEmail(e.target.value)}
-                    placeholder="Enter your email address"
-                    className="w-full pl-11 pr-4 py-4 bg-[#faf9f6] border border-stone-300 text-xs font-light text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-black focus:bg-white transition-all shadow-inner"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="px-9 py-4 bg-black text-white text-[10px] uppercase tracking-[0.25em] font-medium hover:bg-brand-primary hover:text-black transition-all shadow-md whitespace-nowrap"
-                >
-                  Subscribe &rarr;
-                </button>
-              </form>
-            )}
-
-            {/* Micro Purity Guarantees */}
-            <div className="mt-12 pt-8 border-t border-stone-200/80 w-full flex flex-wrap items-center justify-center gap-8 text-[9px] uppercase tracking-[0.25em] text-stone-400 font-medium">
-              <span className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-brand-primary"></span> Zero Spam Guarantee
-              </span>
-              <span className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-brand-primary"></span> Seasonal Private Offers
-              </span>
-              <span className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-brand-primary"></span> Unsubscribe Anytime
-              </span>
-            </div>
-
-          </motion.div>
-        </div>
-      </section>
 
     </div>
   );
 }
-
-

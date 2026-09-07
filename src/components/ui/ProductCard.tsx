@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useCart } from "@/context/CartContext";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { Instagram, Play } from "lucide-react";
 import StarRating from "./StarRating";
 
 export default function ProductCard({ product }: { product: any }) {
@@ -19,10 +20,8 @@ export default function ProductCard({ product }: { product: any }) {
     };
 
     const handleNavigate = () => {
-        router.push(`/product/${product._id}`);
+        router.push(`/product/${product._id || product.id}`);
     };
-
-    const categoryName = typeof product.category === 'object' ? product.category.name : product.category;
 
     return (
         <div onClick={handleNavigate} className="group flex flex-col cursor-pointer bg-white relative pb-10 h-full">
@@ -30,6 +29,18 @@ export default function ProductCard({ product }: { product: any }) {
             {product.isFeatured && (
                 <div className="absolute top-4 left-0 z-10 text-[9px] font-light uppercase tracking-[0.2em] text-[#e7ab79] rotate-[-90deg] origin-top-left translate-y-24">
                     Signature
+                </div>
+            )}
+
+            {/* Reel / Video Badge */}
+            {(product.instagramVideoUrl || product.videoUrl) && (
+                <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1 bg-white/95 backdrop-blur-sm border border-gray-200 text-gray-800 text-[8px] font-medium uppercase tracking-widest shadow-sm rounded-full group-hover:border-black transition-colors">
+                    {product.instagramVideoUrl ? (
+                        <Instagram className="w-3 h-3 text-[#dc2743]" />
+                    ) : (
+                        <Play className="w-2.5 h-2.5 text-black fill-black" />
+                    )}
+                    <span>Reel</span>
                 </div>
             )}
 
@@ -55,7 +66,9 @@ export default function ProductCard({ product }: { product: any }) {
 
             {/* Info Container */}
             <div className="flex flex-col pt-6 text-center">
-                <span className="text-[10px] text-gray-400 uppercase tracking-[0.2em] mb-3">{categoryName}</span>
+                <span className="text-[10px] text-gray-400 uppercase tracking-[0.2em] mb-3">
+                    {product.flavor || "Artisanal Kerala Chips"}
+                </span>
                 <h3 className="text-lg font-serif font-normal text-gray-900 mb-2 uppercase tracking-tight italic">
                     {product.name}
                 </h3>
